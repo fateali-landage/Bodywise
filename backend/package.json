@@ -1,0 +1,26 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node --watch server.js",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "bodywise",
+    "express",
+    "supabase"
+  ],
+  "author": "BodyWise Team",
+  "license": "MIT",
+  "description": "BodyWise AI backend API",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.104.1",
+    "axios": "^1.15.2",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "openai": "^6.34.0"
+  }
+}
