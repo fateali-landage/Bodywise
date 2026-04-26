@@ -3,4 +3,37 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl || "", supabaseAnonKey || "");
+const stubSupabase = {
+  auth: {
+    async getSession() {
+      return { data: { session: null }, error: null };
+    },
+    onAuthStateChange() {
+      return {
+        data: {
+          subscription: {
+            unsubscribe() {},
+          },
+        },
+      };
+    },
+    async signInWithPassword() {
+      return {
+        data: { session: null, user: null },
+        error: { message: "Supabase not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY." },
+      };
+    },
+    async signUp() {
+      return {
+        data: { session: null, user: null },
+        error: { message: "Supabase not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY." },
+      };
+    },
+    async signOut() {
+      return { error: null };
+    },
+  },
+};
+
+export const supabase =
+  supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : stubSupabase;
