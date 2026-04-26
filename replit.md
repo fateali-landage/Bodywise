@@ -51,13 +51,40 @@ backend/
 frontend/
   vite.config.js       # Replit-aware Vite config (host, proxy, HMR)
   src/
-    App.jsx            # Router + auth gate
-    pages/             # AuthPage, DashboardPage
-    components/        # Card, ProtectedRoute, ScoreBar
-    hooks/useAuth.js   # Supabase session hook
-    services/          # api.js, supabaseClient.js (stub when unset)
-supabase/seed.sql      # schema/seed for habits etc.
+    App.jsx                       # Router + auth gate (multi-page)
+    styles/design-system.css      # Design tokens, sidebar, glass cards
+    components/
+      Layout.jsx                  # Sidebar shell + <Outlet/>
+      Sidebar.jsx                 # Nav links to all pages
+      ProtectedRoute.jsx          # Auth guard
+      ui/index.jsx                # Reusable primitives
+                                  # (Spinner, Field, Toggle, ScoreRing, etc.)
+    context/BodyWiseContext.jsx   # Shared inputs/results + API calls
+    pages/
+      AuthPage.jsx                # Sign in / sign up
+      DashboardPage.jsx           # Overview: scores + summary
+      AnalyzePage.jsx             # Body / skin / lifestyle inputs
+      ResultsPage.jsx             # Read-only consolidated report
+      DietPage.jsx                # Food intelligence + habit coach
+      ProfilePage.jsx             # Account + metric snapshot
+    hooks/useAuth.js              # Supabase session hook
+    services/                     # api.js, supabaseClient.js (stub when unset)
+supabase/seed.sql                 # schema/seed for habits etc.
 ```
+
+## Frontend Routing
+
+| Path        | Page              | Notes                                     |
+| ----------- | ----------------- | ----------------------------------------- |
+| `/auth`     | AuthPage          | Public sign in / sign up                  |
+| `/`         | DashboardPage     | Wrapped in `Layout` (sidebar)             |
+| `/analyze`  | AnalyzePage       | Body, skin & lifestyle input forms        |
+| `/results`  | ResultsPage       | Aggregated read-only report               |
+| `/diet`     | DietPage          | Food analyzer + habit toggles             |
+| `/profile`  | ProfilePage       | Account info + sign out                   |
+| `*`         | redirects to `/`  |                                           |
+
+All authenticated pages share state through `BodyWiseProvider`, so analysis data persists when navigating between pages within a session.
 
 ## API Endpoints
 - `GET  /health`
