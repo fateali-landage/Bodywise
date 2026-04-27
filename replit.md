@@ -32,6 +32,12 @@ This project runs as two workflows in development and as a single Express proces
 ### OpenAI (optional)
 - Backend uses `OPENAI_API_KEY` for richer insights. If unset, mock insights are returned.
 
+### Google Gemini (optional)
+- Backend uses `GEMINI_API_KEY` for the `POST /api/ai-insights` endpoint.
+- Default model is `gemini-2.0-flash` (override via `GEMINI_MODEL` env var).
+- If the key is unset, the endpoint returns `503` with a clear error.
+- Quota / auth / model errors are surfaced as `429` / `401` / `502` respectively (not silently swallowed).
+
 ## Production Deployment
 
 Configured as **Autoscale**:
@@ -95,6 +101,8 @@ All authenticated pages share state through `BodyWiseProvider`, so analysis data
 - `POST /api/habits`
 - `POST /api/food`
 - `POST /api/lifestyle`
+- `POST /api/ai-insights` — Gemini health insights. Body: `{ weight, height, age, activity }`. Returns `{ success, data: { insight, recommendation, risk_prediction } }`.
 
 ## Recent Changes
+- 2026-04-27: Added Google Gemini integration. New files: `backend/config/geminiClient.js`, `backend/services/aiInsightsService.js`, `backend/controllers/aiInsightsController.js`. New route `POST /api/ai-insights`. Added `@google/generative-ai` dependency.
 - 2026-04-26: Initial Replit import. Configured Vite for Replit proxy (host 0.0.0.0, allowed hosts, HMR client port, `/api` proxy to backend on 3001). Made Supabase client tolerant of missing env vars so the UI renders without keys. Added Express static-serve of `frontend/dist` for production. Configured Autoscale deployment.

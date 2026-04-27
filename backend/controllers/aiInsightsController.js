@@ -29,9 +29,10 @@ export const getAiInsights = async (req, res) => {
       data: result,
     });
   } catch (err) {
-    return res.status(500).json({
+    const status = err?.status || 500;
+    return res.status(status).json({
       success: false,
-      error: "Failed to generate AI insights",
+      error: err?.message || "Failed to generate AI insights",
     });
   }
 };

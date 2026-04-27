@@ -56,9 +56,27 @@ const safeParse = (text) => {
   }
 };
 
+const classifyError = (err) => {
+  const message = err?.message || String(err);
+  const lower = message.toLowerCase();
+
+  if (lower.includes("quota") || lower.includes("rate") || lower.includes("429")) {
+    return { status: 429, error: "Gemini API quota or rate limit exceeded. Please try again later." };
+  }
+  if (lower.includes("api key") || lower.includes("unauthorized") || lower.includes("401") || lower.includes("403")) {
+    return { status: 401, error: "Gemini API key is invalid or unauthorized." };
+  }
+  if (lower.includes("not found") || lower.includes("404")) {
+    return { status: 502, error: "Gemini model is unavailable for this API version." };
+  }
+  return { status: 502, error: "Failed to reach the Gemini API." };
+};
+
 export const generateHealthInsights = async (userData) => {
   if (!isGeminiConfigured()) {
-    return { ...FALLBACK };
+    const err = new Error("Gemini API key is not configured on the server.");
+    err.status = 503;
+    throw err;
   }
 
   const model = getGeminiModel();
@@ -69,7 +87,10 @@ export const generateHealthInsights = async (userData) => {
     const rawText = result?.response?.text?.() ?? "";
     const cleaned = cleanJsonResponse(rawText);
     return safeParse(cleaned);
-  } catch {
-    return { ...FALLBACK };
+  } catch (rawErr) {
+    const { status, error } = classifyError(rawErr);
+    const err = new Error(error);
+    err.status = status;
+    throw err;
   }
 };

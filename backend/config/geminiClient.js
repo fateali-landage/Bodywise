@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { env } from "./env.js";
 
-const GEMINI_MODEL = "gemini-1.5-flash";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.0-flash";
 
 let genAI = null;
 let geminiModel = null;
