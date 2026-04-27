@@ -16,6 +16,7 @@
   "license": "MIT",
   "description": "BodyWise AI backend API",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.104.1",
     "axios": "^1.15.2",
     "cors": "^2.8.6",
