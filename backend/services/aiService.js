@@ -19,7 +19,7 @@ export const generateInsight = async (data, systemPrompt) => {
 
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash-latest",
+      model: "gemini-2.0-flash",
     });
 
     const prompt = `
