@@ -1,6 +1,8 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { env } from "../config/env.js";
 
+console.log("🔑 Gemini Key Exists:", !!env.geminiApiKey);
+
 const genAI = env.geminiApiKey
   ? new GoogleGenerativeAI(env.geminiApiKey)
   : null;
