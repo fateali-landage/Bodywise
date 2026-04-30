@@ -3,6 +3,7 @@ import { useBodyWise } from "../context/BodyWiseContext";
 import {
   ActionButton,
   EmptyState,
+  ErrorBanner,
   Field,
   FieldLabel,
   PageHeader,
@@ -33,6 +34,8 @@ export default function AnalyzePage() {
     runAnalysis,
     runLifestyle,
     loading,
+    error,
+    setError,
   } = useBodyWise();
 
   const handleRunBody = async () => {
@@ -42,6 +45,7 @@ export default function AnalyzePage() {
 
   return (
     <>
+      <ErrorBanner message={error} onDismiss={() => setError(null)} />
       <PageHeader
         title="Analyze"
         description="Provide your data — we'll generate body, skin and lifestyle insights."
@@ -141,7 +145,7 @@ export default function AnalyzePage() {
             { key: "smoking", label: "Smoking", icon: "🚬" },
             { key: "alcohol", label: "Alcohol", icon: "🍷" },
           ].map(({ key, label, icon }) => (
-            <label
+            <div
               key={key}
               style={{
                 display: "flex",
@@ -151,7 +155,6 @@ export default function AnalyzePage() {
                 borderRadius: "var(--radius-md)",
                 background: "var(--bg-surface)",
                 border: `1px solid ${lifestyle[key] ? "rgba(248,113,113,0.2)" : "var(--border)"}`,
-                cursor: "pointer",
                 transition: "all 0.15s",
               }}
             >
@@ -173,7 +176,7 @@ export default function AnalyzePage() {
                 onChange={(e) => setLifestyle((p) => ({ ...p, [key]: e.target.checked }))}
                 color="red"
               />
-            </label>
+            </div>
           ))}
           <Field
             label="Sleep hours / night"

@@ -1,3 +1,52 @@
+/**
+ * ErrorBanner — Dismissible error alert shown when an API call fails.
+ * Receives the error message string and an onDismiss callback.
+ */
+export const ErrorBanner = ({ message, onDismiss }) => {
+  if (!message) return null;
+  return (
+    <div
+      role="alert"
+      style={{
+        display: "flex",
+        alignItems: "flex-start",
+        justifyContent: "space-between",
+        gap: 12,
+        padding: "12px 16px",
+        marginBottom: 20,
+        borderRadius: "var(--radius-md)",
+        background: "rgba(248,113,113,0.08)",
+        border: "1px solid rgba(248,113,113,0.25)",
+        fontSize: 13,
+        color: "var(--red)",
+        lineHeight: 1.5,
+        animation: "fadeUp 0.3s ease-out both",
+      }}
+    >
+      <span>⚠ {message}</span>
+      {onDismiss && (
+        <button
+          onClick={onDismiss}
+          style={{
+            background: "none",
+            border: "none",
+            color: "var(--red)",
+            cursor: "pointer",
+            fontSize: 16,
+            lineHeight: 1,
+            flexShrink: 0,
+            padding: "0 2px",
+            opacity: 0.7,
+          }}
+          aria-label="Dismiss error"
+        >
+          ×
+        </button>
+      )}
+    </div>
+  );
+};
+
 export const Spinner = () => (
   <svg
     style={{ width: 14, height: 14, animation: "spin 0.8s linear infinite" }}
@@ -8,6 +57,7 @@ export const Spinner = () => (
     <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
   </svg>
 );
+
 
 export const FieldLabel = ({ children }) => (
   <span className="section-label" style={{ display: "block", marginBottom: 6 }}>
@@ -27,14 +77,22 @@ export const ResultBox = ({ children }) =>
 
 export const EmptyState = ({ message }) => <div className="empty-state">{message}</div>;
 
+// BUG-016 FIX: use a real hidden <input type="checkbox"> so label click
+// fires the onChange exactly once — no more double-toggle bug.
 export const Toggle = ({ checked, onChange, color = "cyan" }) => (
-  <div
-    className={`toggle-track${checked ? ` on-${color}` : ""}`}
-    onClick={() => onChange({ target: { checked: !checked } })}
-  >
-    <div className="toggle-thumb" />
-  </div>
+  <label style={{ display: "inline-flex", cursor: "pointer", position: "relative" }}>
+    <input
+      type="checkbox"
+      checked={checked}
+      onChange={onChange}
+      style={{ position: "absolute", opacity: 0, width: 0, height: 0 }}
+    />
+    <div className={`toggle-track${checked ? ` on-${color}` : ""}`}>
+      <div className="toggle-thumb" />
+    </div>
+  </label>
 );
+
 
 export const ActionButton = ({ onClick, loading, disabled, color = "cyan", children }) => (
   <button

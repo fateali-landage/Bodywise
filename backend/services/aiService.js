@@ -1,29 +1,40 @@
-import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { env } from "../config/env.js";
 
-const openai = env.openAiApiKey ? new OpenAI({ apiKey: env.openAiApiKey }) : null;
+const genAI = env.geminiApiKey
+  ? new GoogleGenerativeAI(env.geminiApiKey)
+  : null;
 
 const mockInsight = (data) => {
   if (data?.type === "food") {
-    return `This meal is useful for steady energy. Pair ${data.food} with fiber and water for improved digestion.`;
+    return `This meal provides useful energy. Pair ${data.food} with fiber-rich vegetables and adequate water for improved digestion and satiety.`;
   }
-  return "Your routine looks mostly stable. Focus on sleep consistency, hydration, and protein quality this week.";
+  return "Your routine looks mostly stable. Prioritise sleep consistency (7–8 hrs), hydration (2.5–3 L/day), and protein at every meal this week.";
 };
 
 export const generateInsight = async (data, systemPrompt) => {
-  if (!openai) return mockInsight(data);
+  if (!genAI) return mockInsight(data);
 
   try {
-    const completion = await openai.responses.create({
-      model: "gpt-4o-mini",
-      input: [
-        { role: "system", content: systemPrompt || "You are a concise wellness coach." },
-        { role: "user", content: JSON.stringify(data) },
-      ],
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
     });
 
-    return completion.output_text || mockInsight(data);
+    const prompt = `
+${systemPrompt || "You are a concise, evidence-based wellness coach."}
+
+User Data:
+${JSON.stringify(data)}
+
+Give clear, short insight and recommendation.
+`;
+
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+
+    return text || mockInsight(data);
   } catch (error) {
+    console.error("[aiService] Gemini error:", error?.message || error);
     return mockInsight(data);
   }
 };

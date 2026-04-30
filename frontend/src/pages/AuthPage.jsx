@@ -9,6 +9,7 @@ export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);   // BUG-018 FIX: explicit flag
   const [isDark, setIsDark] = useState(true);
   const [focused, setFocused] = useState(null);
   const [mounted, setMounted] = useState(false);
@@ -21,14 +22,18 @@ export default function AuthPage() {
     event.preventDefault();
     setLoading(true);
     setMessage("");
+    setIsError(false);
 
     const action = isLogin
       ? supabase.auth.signInWithPassword({ email, password })
       : supabase.auth.signUp({ email, password });
 
     const { error } = await action;
-    if (error) setMessage(error.message);
-    else {
+    if (error) {
+      setIsError(true);
+      setMessage(error.message);
+    } else {
+      setIsError(false);
       setMessage(isLogin ? "Login successful." : "Signup successful. Check email if confirmation is enabled.");
       navigate("/");
     }
@@ -163,6 +168,7 @@ export default function AuthPage() {
                   onBlur={() => setFocused(null)}
                   style={{ color: t.inputText, caretColor: t.focusBorder }}
                   required
+                  minLength={6}
                 />
               </div>
             </div>
@@ -188,17 +194,13 @@ export default function AuthPage() {
 
           </form>
 
-          {/* Feedback message */}
           {message && (
             <div
               className="feedback-msg"
               style={{
-                background: message.toLowerCase().includes("error") || message.toLowerCase().includes("invalid")
-                  ? t.errorBg : t.successBg,
-                color: message.toLowerCase().includes("error") || message.toLowerCase().includes("invalid")
-                  ? t.errorText : t.successText,
-                borderColor: message.toLowerCase().includes("error") || message.toLowerCase().includes("invalid")
-                  ? t.errorBorder : t.successBorder,
+                background: isError ? t.errorBg : t.successBg,
+                color: isError ? t.errorText : t.successText,
+                borderColor: isError ? t.errorBorder : t.successBorder,
               }}
             >
               {message}

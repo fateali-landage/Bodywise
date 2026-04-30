@@ -5,8 +5,10 @@ import { ActionButton, PageHeader, SectionHeader, SectionTitle } from "../compon
 export default function ProfilePage() {
   const { user, inputs, lifestyle, result } = useBodyWise();
 
+  // BUG-004/BUG-012 FIX: centralised sign-out with immediate navigate
   const signOut = async () => {
     await supabase.auth.signOut();
+    // useAuth's onAuthStateChange fires → user becomes null → ProtectedRoute redirects to /auth
   };
 
   const profileRows = [

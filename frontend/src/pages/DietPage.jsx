@@ -3,6 +3,7 @@ import { useBodyWise } from "../context/BodyWiseContext";
 import {
   ActionButton,
   EmptyState,
+  ErrorBanner,
   FieldLabel,
   PageHeader,
   ResultBox,
@@ -24,6 +25,8 @@ export default function DietPage() {
     refreshHabits,
     result,
     loading,
+    error,
+    setError,
   } = useBodyWise();
 
   useEffect(() => {
@@ -32,6 +35,7 @@ export default function DietPage() {
 
   return (
     <>
+      <ErrorBanner message={error} onDismiss={() => setError(null)} />
       <PageHeader
         title="Diet & Calories"
         description="Log meals, track daily habits and get nutrition insights."
@@ -79,7 +83,7 @@ export default function DietPage() {
         <SectionHeader icon="📋" title="Daily Habit Coach" badge="Today" badgeColor="emerald" />
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {Object.keys(habitItems).map((item) => (
-            <label
+            <div
               key={item}
               style={{
                 display: "flex",
@@ -89,7 +93,6 @@ export default function DietPage() {
                 borderRadius: "var(--radius-md)",
                 background: "var(--bg-surface)",
                 border: "1px solid var(--border)",
-                cursor: "pointer",
                 transition: "background 0.15s",
               }}
               onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-surface-hover)")}
@@ -110,7 +113,7 @@ export default function DietPage() {
                 onChange={(e) => setHabitItems((prev) => ({ ...prev, [item]: e.target.checked }))}
                 color="emerald"
               />
-            </label>
+            </div>
           ))}
         </div>
         <ActionButton onClick={saveHabit} loading={loading.habit} color="emerald">
