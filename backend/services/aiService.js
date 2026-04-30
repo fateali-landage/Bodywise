@@ -32,11 +32,23 @@ Give clear, short insight and recommendation.
 `;
 
     const result = await model.generateContent(prompt);
-    const text = result.response.text();
+    const response = result?.response;
 
-    return text || mockInsight(data);
+    let text =
+      response?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      (typeof response?.text === "function" ? response.text() : "") ||
+      "";
+
+    if (!text) {
+      console.log("⚠️ Empty Gemini response");
+      return mockInsight(data);
+    }
+
+    console.log("✅ Gemini response:", text);
+    return text;
+
   } catch (error) {
-    console.error("[aiService] Gemini error:", error?.message || error);
+    console.error("🔥 Gemini error:", error?.message || error);
     return mockInsight(data);
   }
 };
