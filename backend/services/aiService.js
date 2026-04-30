@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { env } from "../config/env.js";
 
+console.log("🚀 Gemini 2.0 Flash ACTIVE");
 console.log("🔑 Gemini Key Exists:", !!env.geminiApiKey);
 
 const genAI = env.geminiApiKey
