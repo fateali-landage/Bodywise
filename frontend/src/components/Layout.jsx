@@ -14,7 +14,7 @@ function ThemeToggle() {
       onClick={toggleTheme}
       aria-label="Toggle theme"
     >
-      <span style={{ fontSize: 14 }}>{isDark ? "☀️" : "🌙"}</span>
+      <span className="text-[14px]">{isDark ? "☀️" : "🌙"}</span>
       <span>{isDark ? "Light" : "Dark"}</span>
     </button>
   );
@@ -38,8 +38,8 @@ function AppShell({ user }) {
           >
             ☰
           </button>
-          <span className="display" style={{ fontWeight: 700, color: "var(--text-primary)" }}>
-            BodyWise <span style={{ color: "var(--cyan)" }}>AI</span>
+          <span className="display font-bold text-[var(--text-primary)]">
+            BodyWise <span className="text-[var(--cyan)]">AI</span>
           </span>
           <ThemeToggle />
         </div>
@@ -57,16 +57,8 @@ function AppShell({ user }) {
           />
           <main className="main-content">
             {/* Desktop theme toggle in top-right of main area */}
-            <div style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              marginBottom: 8,
-              position: "sticky",
-              top: 0,
-              zIndex: 3,
-              pointerEvents: "none",
-            }}>
-              <div style={{ pointerEvents: "auto" }}>
+            <div className="hidden md:flex justify-end mb-2 sticky top-0 z-[3] pointer-events-none">
+              <div className="pointer-events-auto">
                 <ThemeToggle />
               </div>
             </div>

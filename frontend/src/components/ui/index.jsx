@@ -7,37 +7,17 @@ export const ErrorBanner = ({ message, onDismiss }) => {
   return (
     <div
       role="alert"
+      className="flex items-start justify-between gap-3 p-3 sm:p-4 mb-5 rounded-[var(--radius-md)] text-[13px] leading-relaxed text-[var(--red)] animate-[fadeUp_0.3s_ease-out_both]"
       style={{
-        display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "space-between",
-        gap: 12,
-        padding: "12px 16px",
-        marginBottom: 20,
-        borderRadius: "var(--radius-md)",
         background: "rgba(248,113,113,0.08)",
         border: "1px solid rgba(248,113,113,0.25)",
-        fontSize: 13,
-        color: "var(--red)",
-        lineHeight: 1.5,
-        animation: "fadeUp 0.3s ease-out both",
       }}
     >
       <span>⚠ {message}</span>
       {onDismiss && (
         <button
           onClick={onDismiss}
-          style={{
-            background: "none",
-            border: "none",
-            color: "var(--red)",
-            cursor: "pointer",
-            fontSize: 16,
-            lineHeight: 1,
-            flexShrink: 0,
-            padding: "0 2px",
-            opacity: 0.7,
-          }}
+          className="bg-transparent border-none text-[var(--red)] cursor-pointer text-base leading-none shrink-0 px-0.5 opacity-70 hover:opacity-100 transition-opacity"
           aria-label="Dismiss error"
         >
           ×
@@ -49,7 +29,7 @@ export const ErrorBanner = ({ message, onDismiss }) => {
 
 export const Spinner = () => (
   <svg
-    style={{ width: 14, height: 14, animation: "spin 0.8s linear infinite" }}
+    className="w-3.5 h-3.5 animate-spin"
     viewBox="0 0 24 24"
     fill="none"
   >
@@ -60,15 +40,15 @@ export const Spinner = () => (
 
 
 export const FieldLabel = ({ children }) => (
-  <span className="section-label" style={{ display: "block", marginBottom: 6 }}>
+  <span className="section-label block mb-1.5">
     {children}
   </span>
 );
 
 export const Field = ({ label, ...props }) => (
-  <div style={{ display: "flex", flexDirection: "column" }}>
+  <div className="flex flex-col w-full">
     <FieldLabel>{label}</FieldLabel>
-    <input className="field-input" {...props} />
+    <input className="field-input w-full" {...props} />
   </div>
 );
 
@@ -80,12 +60,12 @@ export const EmptyState = ({ message }) => <div className="empty-state">{message
 // BUG-016 FIX: use a real hidden <input type="checkbox"> so label click
 // fires the onChange exactly once — no more double-toggle bug.
 export const Toggle = ({ checked, onChange, color = "cyan" }) => (
-  <label style={{ display: "inline-flex", cursor: "pointer", position: "relative" }}>
+  <label className="inline-flex cursor-pointer relative">
     <input
       type="checkbox"
       checked={checked}
       onChange={onChange}
-      style={{ position: "absolute", opacity: 0, width: 0, height: 0 }}
+      className="absolute opacity-0 w-0 h-0"
     />
     <div className={`toggle-track${checked ? ` on-${color}` : ""}`}>
       <div className="toggle-thumb" />
@@ -94,9 +74,9 @@ export const Toggle = ({ checked, onChange, color = "cyan" }) => (
 );
 
 
-export const ActionButton = ({ onClick, loading, disabled, color = "cyan", children }) => (
+export const ActionButton = ({ onClick, loading, disabled, color = "cyan", children, className = "" }) => (
   <button
-    className={`btn btn-${color}`}
+    className={`btn btn-${color} w-full sm:w-auto justify-center ${className}`}
     onClick={onClick}
     disabled={disabled || loading}
   >
@@ -106,34 +86,12 @@ export const ActionButton = ({ onClick, loading, disabled, color = "cyan", child
 );
 
 export const SectionHeader = ({ icon, title, badge, badgeColor = "cyan" }) => (
-  <div
-    style={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      marginBottom: 20,
-    }}
-  >
-    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-      <div
-        style={{
-          width: 34,
-          height: 34,
-          borderRadius: 10,
-          background: "rgba(255,255,255,0.06)",
-          border: "1px solid var(--border)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 16,
-        }}
-      >
+  <div className="flex items-center justify-between mb-5">
+    <div className="flex items-center gap-2.5">
+      <div className="w-8 h-8 rounded-[10px] flex items-center justify-center text-base bg-[rgba(255,255,255,0.06)] border border-[var(--border)]">
         {icon}
       </div>
-      <span
-        className="display"
-        style={{ fontSize: 15, fontWeight: 600, color: "var(--text-primary)" }}
-      >
+      <span className="font-syne text-[15px] font-semibold text-[var(--text-primary)]">
         {title}
       </span>
     </div>
@@ -147,31 +105,9 @@ export const ScoreRing = ({ value, label, icon, color, trackColor, glowColor }) 
   const dash = (value / 100) * circ;
 
   return (
-    <div
-      className="glass"
-      style={{
-        padding: "28px 20px",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 16,
-        textAlign: "center",
-      }}
-    >
-      <div
-        style={{
-          position: "relative",
-          width: 100,
-          height: 100,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <svg
-          style={{ position: "absolute", inset: 0, transform: "rotate(-90deg)" }}
-          viewBox="0 0 100 100"
-        >
+    <div className="glass p-5 sm:p-7 flex flex-col items-center gap-4 text-center h-full justify-center">
+      <div className="relative w-[100px] h-[100px] flex items-center justify-center">
+        <svg className="absolute inset-0 -rotate-90" viewBox="0 0 100 100">
           <circle cx="50" cy="50" r={r} fill="none" stroke={trackColor} strokeWidth="7" />
           <circle
             cx="50"
@@ -188,13 +124,13 @@ export const ScoreRing = ({ value, label, icon, color, trackColor, glowColor }) 
             }}
           />
         </svg>
-        <span style={{ fontSize: 26, zIndex: 1 }}>{icon}</span>
+        <span className="text-[26px] relative z-10">{icon}</span>
       </div>
       <div>
         <div className="score-ring-value" style={{ color }}>
           {value}
         </div>
-        <div className="section-label" style={{ marginTop: 4 }}>
+        <div className="section-label mt-1">
           {label}
         </div>
       </div>
@@ -204,44 +140,25 @@ export const ScoreRing = ({ value, label, icon, color, trackColor, glowColor }) 
 
 export const PageHeader = ({ eyebrow, title, description, actions }) => (
   <header className="page-header fade-up">
-    <div
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "space-between",
-        gap: 16,
-        flexWrap: "wrap",
-      }}
-    >
-      <div>
+    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 flex-wrap">
+      <div className="flex-1">
         {eyebrow && (
-          <span className="badge badge-cyan" style={{ marginBottom: 12 }}>
-            <span
-              style={{
-                width: 6,
-                height: 6,
-                borderRadius: "50%",
-                background: "var(--cyan)",
-                animation: "pulse 1.8s ease-in-out infinite",
-              }}
-            />
+          <span className="badge badge-cyan mb-3">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--cyan)] animate-[pulse_1.8s_ease-in-out_infinite]" />
             {eyebrow}
           </span>
         )}
-        <h1>{title}</h1>
-        {description && <p>{description}</p>}
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold">{title}</h1>
+        {description && <p className="mt-2 text-sm text-[var(--text-muted)] max-w-2xl">{description}</p>}
       </div>
-      {actions && <div style={{ display: "flex", gap: 10, alignItems: "center" }}>{actions}</div>}
+      {actions && <div className="flex flex-col sm:flex-row gap-2 sm:items-center w-full sm:w-auto">{actions}</div>}
     </div>
   </header>
 );
 
 export const SectionTitle = ({ children }) => (
-  <div
-    className="fade-up"
-    style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}
-  >
+  <div className="fade-up flex items-center gap-2.5 mb-3.5">
     <span className="section-label">{children}</span>
-    <div className="divider" style={{ flex: 1 }} />
+    <div className="divider flex-1" />
   </div>
 );

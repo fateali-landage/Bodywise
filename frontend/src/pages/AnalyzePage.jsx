@@ -109,14 +109,14 @@ export default function AnalyzePage() {
 
       {/* ─── Body Analysis ─── */}
       <SectionTitle>Body Analysis</SectionTitle>
-      <div className="fade-up d2" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(320px,1fr))", gap: 14, marginBottom: 40 }}>
-        <div className="glass" style={{ padding: 24 }}>
+      <div className="fade-up d2 grid grid-cols-1 lg:grid-cols-2 gap-4 mb-10 items-stretch">
+        <div className="glass p-5 sm:p-6 flex flex-col h-full">
           <SectionHeader icon="🫀" title="Body Reaction Analyzer" badge="BMI + Prediction" badgeColor="cyan" />
 
           {/* Gender selector */}
-          <div style={{ marginBottom: 14 }}>
+          <div className="mb-4 mt-4">
             <FieldLabel>Gender</FieldLabel>
-            <div style={{ marginTop: 6 }}>
+            <div className="mt-1.5">
               <RadioGroup
                 options={GENDER_OPTS}
                 value={inputs.gender}
@@ -127,9 +127,9 @@ export default function AnalyzePage() {
           </div>
 
           {/* Diet selector */}
-          <div style={{ marginBottom: 14 }}>
+          <div className="mb-4">
             <FieldLabel>Diet Type</FieldLabel>
-            <div style={{ marginTop: 6 }}>
+            <div className="mt-1.5">
               <RadioGroup
                 options={DIET_OPTS}
                 value={inputs.diet}
@@ -140,7 +140,7 @@ export default function AnalyzePage() {
           </div>
 
           {/* Numeric fields */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 4 }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
             {numericFields.map(({ key, label, placeholder }) => (
               <Field
                 key={key}
@@ -153,77 +153,80 @@ export default function AnalyzePage() {
             ))}
           </div>
 
-          <ActionButton onClick={handleRunBody} loading={loading.body} color="cyan">
+          <ActionButton onClick={handleRunBody} loading={loading.body} color="cyan" className="mt-4">
             {loading.body ? "Analyzing…" : "Run Body + Skin + Prediction"}
           </ActionButton>
 
-          {result.body ? (
-            <ResultBox>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
-                <span className="badge badge-cyan mono">BMI {result.body.bmi}</span>
-                <span style={{ color: "var(--text-primary)", fontWeight: 500 }}>{result.body.status}</span>
-              </div>
-              <p style={{ margin: "0 0 10px", color: "var(--text-secondary)" }}>{result.body.insight}</p>
-              {result.prediction && (
-                <div style={{ paddingTop: 10, borderTop: "1px solid var(--border)", fontSize: 12.5, color: "var(--text-muted)" }}>
-                  <span>📈 {result.prediction.weightTrend}</span>
-                  <span style={{ margin: "0 8px" }}>·</span>
-                  <span>Skin risk: {result.prediction.skinConditionRisk}</span>
+          <div className="mt-4">
+            {result.body ? (
+              <ResultBox>
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                  <span className="badge badge-cyan mono">BMI {result.body.bmi}</span>
+                  <span className="font-medium text-[var(--text-primary)]">{result.body.status}</span>
                 </div>
-              )}
-            </ResultBox>
-          ) : (
-            <EmptyState message="Fill in your metrics and run analysis to see results" />
-          )}
+                <p className="m-0 mb-2 text-[var(--text-secondary)]">{result.body.insight}</p>
+                {result.prediction && (
+                  <div className="pt-2.5 border-t border-[var(--border)] text-[12.5px] text-[var(--text-muted)] mt-3">
+                    <span>📈 {result.prediction.weightTrend}</span>
+                    <span className="mx-2">·</span>
+                    <span>Skin risk: {result.prediction.skinConditionRisk}</span>
+                  </div>
+                )}
+              </ResultBox>
+            ) : (
+              <EmptyState message="Fill in your metrics and run analysis to see results" />
+            )}
+          </div>
         </div>
 
         {/* Skin */}
-        <div className="glass" style={{ padding: 24 }}>
+        <div className="glass p-5 sm:p-6 flex flex-col h-full">
           <SectionHeader icon="✨" title="Skin Health Analyzer" badge="AI Vision" badgeColor="violet" />
-          <FieldLabel>Upload skin photo</FieldLabel>
-          <label className="upload-zone">
-            <span style={{ fontSize: 32 }}>📸</span>
-            <span style={{ fontSize: 13.5, color: "var(--text-secondary)", fontWeight: 500 }}>Drop image or click to upload</span>
-            <span style={{ fontSize: 11.5, color: "var(--text-muted)" }}>JPG, PNG, WEBP up to 10 MB</span>
-            <input type="file" accept="image/*" style={{ display: "none" }} />
-          </label>
-          <p style={{ marginTop: 10, fontSize: 11.5, color: "var(--text-muted)", lineHeight: 1.5 }}>
-            Image analysis is simulated in this MVP — backend returns AI-generated insights.
-          </p>
-          {result.skin ? (
-            <ResultBox>
-              <div style={{ marginBottom: 8, display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {result.skin.detected.map((d) => (
-                  <span key={d} className="badge badge-violet">{d}</span>
-                ))}
-              </div>
-              <p style={{ margin: 0, color: "var(--text-secondary)" }}>{result.skin.insight}</p>
-            </ResultBox>
-          ) : (
-            <EmptyState message="Run body analysis to populate skin insights" />
-          )}
+          <div className="mt-4">
+            <FieldLabel>Upload skin photo</FieldLabel>
+            <label className="upload-zone mt-2 flex flex-col items-center justify-center text-center p-8 border border-dashed rounded-[var(--radius-md)] cursor-pointer bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-hover)] transition-colors">
+              <span className="text-3xl mb-2">📸</span>
+              <span className="text-[13.5px] font-medium text-[var(--text-secondary)]">Drop image or click to upload</span>
+              <span className="text-[11.5px] text-[var(--text-muted)] mt-1">JPG, PNG, WEBP up to 10 MB</span>
+              <input type="file" accept="image/*" className="hidden" />
+            </label>
+            <p className="mt-2.5 text-[11.5px] leading-relaxed text-[var(--text-muted)]">
+              Image analysis is simulated in this MVP — backend returns AI-generated insights.
+            </p>
+          </div>
+          <div className="flex-1 mt-4">
+            {result.skin ? (
+              <ResultBox>
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {result.skin.detected.map((d) => (
+                    <span key={d} className="badge badge-violet">{d}</span>
+                  ))}
+                </div>
+                <p className="m-0 text-[var(--text-secondary)]">{result.skin.insight}</p>
+              </ResultBox>
+            ) : (
+              <EmptyState message="Run body analysis to populate skin insights" />
+            )}
+          </div>
         </div>
       </div>
 
       {/* ─── Lifestyle Analysis ─── */}
       <SectionTitle>Lifestyle Analysis</SectionTitle>
-      <div className="fade-up d3 glass" style={{ padding: 28, marginBottom: 40 }}>
+      <div className="fade-up d3 glass p-6 sm:p-8 mb-10">
         <SectionHeader icon="🌿" title="Lifestyle Analyzer" badge="Holistic View" badgeColor="amber" />
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 12 }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
 
           {/* Built-in habit toggles */}
           {builtinHabits.map(({ key, label, icon }) => {
             const c = HABIT_COLORS[key] || HABIT_COLORS._default;
             const on = lifestyle[key];
             return (
-              <div key={key} style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-                padding: "12px 14px", borderRadius: "var(--radius-md)",
+              <div key={key} className="flex items-center justify-between p-3 rounded-[var(--radius-md)] transition-all duration-150" style={{
                 background: on ? c.dim : "var(--bg-surface)",
                 border: `1px solid ${on ? c.border : "var(--border)"}`,
-                transition: "all 0.15s",
               }}>
-                <span style={{ fontSize: 13.5, fontWeight: 500, color: "var(--text-primary)", display: "flex", alignItems: "center", gap: 8 }}>
+                <span className="text-[13.5px] font-medium text-[var(--text-primary)] flex items-center gap-2">
                   <span>{icon}</span>{label}
                 </span>
                 <Toggle
@@ -239,16 +242,13 @@ export default function AnalyzePage() {
           {customHabits.map(({ id, name, active }) => {
             const c = HABIT_COLORS._default;
             return (
-              <div key={id} style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-                padding: "12px 14px", borderRadius: "var(--radius-md)",
+              <div key={id} className="flex items-center justify-between p-3 rounded-[var(--radius-md)] transition-all duration-150 gap-2" style={{
                 background: active ? c.dim : "var(--bg-surface)",
                 border: `1px solid ${active ? c.border : "var(--border)"}`,
-                transition: "all 0.15s", gap: 8,
               }}>
-                <span style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)", flex: 1, display: "flex", alignItems: "center", gap: 7 }}>
+                <span className="text-[13px] font-medium text-[var(--text-primary)] flex-1 flex items-center gap-1.5">
                   <span>🔁</span>
-                  <span style={{ textTransform: "capitalize" }}>{name}</span>
+                  <span className="capitalize">{name}</span>
                 </span>
                 <Toggle
                   checked={active}
@@ -257,9 +257,7 @@ export default function AnalyzePage() {
                 />
                 <button
                   onClick={() => removeCustomHabit(id)}
-                  style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 14, lineHeight: 1, padding: "2px 3px", borderRadius: 6, transition: "color 0.15s", flexShrink: 0 }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "var(--red)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
+                  className="bg-transparent border-none text-[var(--text-muted)] hover:text-[var(--red)] cursor-pointer text-sm leading-none p-1 rounded-md transition-colors shrink-0"
                   aria-label="Remove habit"
                 >✕</button>
               </div>
@@ -283,28 +281,29 @@ export default function AnalyzePage() {
         </div>
 
         {/* Add Custom Habit */}
-        <div style={{ marginTop: 16 }}>
+        <div className="mt-4">
           {showHabitInput ? (
-            <div style={{ display: "flex", gap: 8, alignItems: "flex-end", flexWrap: "wrap" }}>
-              <div style={{ flex: 1, minWidth: 180 }}>
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-end w-full">
+              <div className="flex-1 min-w-[180px]">
                 <FieldLabel>Custom habit name</FieldLabel>
                 <input
-                  className="field-input"
+                  className="field-input w-full mt-1.5"
                   value={newHabitInput}
                   onChange={(e) => { setNewHabitInput(e.target.value); setHabitError(""); }}
                   onKeyDown={(e) => e.key === "Enter" && addCustomHabit()}
                   placeholder="e.g. Caffeine, Gaming, Late Night Snack"
                   autoFocus
                 />
-                {habitError && <span style={{ fontSize: 11, color: "var(--red)", marginTop: 4, display: "block" }}>⚠ {habitError}</span>}
+                {habitError && <span className="text-[11px] text-[var(--red)] mt-1 block">⚠ {habitError}</span>}
               </div>
-              <button className="btn btn-violet" style={{ marginTop: 0 }} onClick={addCustomHabit}>Add</button>
-              <button className="btn btn-ghost" style={{ marginTop: 0 }} onClick={() => { setShowHabitInput(false); setHabitError(""); }}>Cancel</button>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <button className="btn btn-violet w-full sm:w-auto justify-center" onClick={addCustomHabit}>Add</button>
+                <button className="btn btn-ghost w-full sm:w-auto justify-center" onClick={() => { setShowHabitInput(false); setHabitError(""); }}>Cancel</button>
+              </div>
             </div>
           ) : (
             <button
-              className="btn btn-ghost"
-              style={{ marginTop: 0, borderStyle: "dashed" }}
+              className="btn btn-ghost border-dashed w-full sm:w-auto justify-center"
               onClick={() => setShowHabitInput(true)}
             >
               + Add Custom Habit
@@ -312,14 +311,18 @@ export default function AnalyzePage() {
           )}
         </div>
 
-        <ActionButton onClick={handleRunLifestyle} loading={loading.lifestyle} color="amber">
-          {loading.lifestyle ? "Analyzing…" : "Analyze Lifestyle"}
-        </ActionButton>
-        {result.lifestyle ? (
-          <ResultBox>{result.lifestyle.insight}</ResultBox>
-        ) : (
-          <EmptyState message="Configure your lifestyle factors above and run analysis" />
-        )}
+        <div className="mt-6">
+          <ActionButton onClick={handleRunLifestyle} loading={loading.lifestyle} color="amber">
+            {loading.lifestyle ? "Analyzing…" : "Analyze Lifestyle"}
+          </ActionButton>
+          <div className="mt-4">
+            {result.lifestyle ? (
+              <ResultBox>{result.lifestyle.insight}</ResultBox>
+            ) : (
+              <EmptyState message="Configure your lifestyle factors above and run analysis" />
+            )}
+          </div>
+        </div>
       </div>
     </>
   );

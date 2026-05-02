@@ -26,30 +26,22 @@ export default function ResultsPage() {
       />
 
       {!hasAny ? (
-        <div className="fade-up glass" style={{ padding: 48, textAlign: "center" }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>📊</div>
-          <h3 className="display" style={{ margin: 0, fontSize: 18, color: "var(--text-primary)" }}>
+        <div className="fade-up glass p-8 sm:p-12 text-center">
+          <div className="text-[40px] mb-3">📊</div>
+          <h3 className="display m-0 text-lg text-[var(--text-primary)]">
             No results yet
           </h3>
-          <p style={{ margin: "8px 0 20px", color: "var(--text-muted)", fontSize: 13.5 }}>
+          <p className="my-2 mb-5 text-[13.5px] text-[var(--text-muted)]">
             Head over to the Analyze page to generate your first report.
           </p>
-          <Link to="/analyze" className="btn btn-cyan" style={{ marginTop: 0, textDecoration: "none" }}>
+          <Link to="/analyze" className="btn btn-cyan mt-0 no-underline inline-flex justify-center w-full sm:w-auto">
             Go to Analyze →
           </Link>
         </div>
       ) : (
         <>
           <SectionTitle>Score Summary</SectionTitle>
-          <section
-            className="fade-up d1"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-              gap: 14,
-              marginBottom: 40,
-            }}
-          >
+          <section className="fade-up d1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
             <ScoreRing
               value={scores.bodyScore}
               label="Body Score"
@@ -77,108 +69,100 @@ export default function ResultsPage() {
           </section>
 
           <SectionTitle>Body & Skin</SectionTitle>
-          <div
-            className="fade-up d2"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-              gap: 14,
-              marginBottom: 40,
-            }}
-          >
-            <div className="glass" style={{ padding: 24 }}>
+          <div className="fade-up d2 grid grid-cols-1 lg:grid-cols-2 gap-4 mb-10 items-stretch">
+            <div className="glass p-5 sm:p-6 flex flex-col h-full">
               <SectionHeader icon="🫀" title="Body Report" badge="BMI" badgeColor="cyan" />
-              {result.body ? (
-                <ResultBox>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
-                    <span className="badge badge-cyan mono">BMI {result.body.bmi}</span>
-                    <span style={{ color: "var(--text-primary)", fontWeight: 500 }}>{result.body.status}</span>
-                  </div>
-                  <p style={{ margin: "0 0 10px", color: "var(--text-secondary)" }}>{result.body.insight}</p>
-                  <ul style={{ margin: "10px 0 0", paddingLeft: 18, color: "var(--text-muted)", fontSize: 12.5 }}>
-                    {result.body.recommendations?.map((r) => (
-                      <li key={r} style={{ marginBottom: 4 }}>{r}</li>
-                    ))}
-                  </ul>
-                  {result.prediction && (
-                    <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid var(--border)", fontSize: 12.5, color: "var(--text-muted)" }}>
-                      <span>📈 {result.prediction.weightTrend}</span>
-                      <span style={{ margin: "0 8px" }}>·</span>
-                      <span>Skin risk: {result.prediction.skinConditionRisk}</span>
+              <div className="flex-1 mt-2">
+                {result.body ? (
+                  <ResultBox>
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                      <span className="badge badge-cyan mono">BMI {result.body.bmi}</span>
+                      <span className="font-medium text-[var(--text-primary)]">{result.body.status}</span>
                     </div>
-                  )}
-                </ResultBox>
-              ) : (
-                <EmptyState message="No body analysis yet" />
-              )}
+                    <p className="m-0 mb-2 text-[var(--text-secondary)]">{result.body.insight}</p>
+                    <ul className="m-0 mt-2 pl-4 text-[12.5px] text-[var(--text-muted)] space-y-1">
+                      {result.body.recommendations?.map((r) => (
+                        <li key={r}>{r}</li>
+                      ))}
+                    </ul>
+                    {result.prediction && (
+                      <div className="mt-3 pt-2.5 border-t border-[var(--border)] text-[12.5px] text-[var(--text-muted)]">
+                        <span>📈 {result.prediction.weightTrend}</span>
+                        <span className="mx-2">·</span>
+                        <span>Skin risk: {result.prediction.skinConditionRisk}</span>
+                      </div>
+                    )}
+                  </ResultBox>
+                ) : (
+                  <EmptyState message="No body analysis yet" />
+                )}
+              </div>
             </div>
 
-            <div className="glass" style={{ padding: 24 }}>
+            <div className="glass p-5 sm:p-6 flex flex-col h-full">
               <SectionHeader icon="✨" title="Skin Report" badge="Vision AI" badgeColor="violet" />
-              {result.skin ? (
-                <ResultBox>
-                  <div style={{ marginBottom: 8, display: "flex", gap: 6, flexWrap: "wrap" }}>
-                    {result.skin.detected.map((d) => (
-                      <span key={d} className="badge badge-violet">
-                        {d}
-                      </span>
-                    ))}
-                  </div>
-                  <p style={{ margin: "0 0 10px", color: "var(--text-secondary)" }}>{result.skin.insight}</p>
-                  <ul style={{ margin: "10px 0 0", paddingLeft: 18, color: "var(--text-muted)", fontSize: 12.5 }}>
-                    {result.skin.suggestions?.map((s) => (
-                      <li key={s} style={{ marginBottom: 4 }}>{s}</li>
-                    ))}
-                  </ul>
-                </ResultBox>
-              ) : (
-                <EmptyState message="No skin analysis yet" />
-              )}
+              <div className="flex-1 mt-2">
+                {result.skin ? (
+                  <ResultBox>
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      {result.skin.detected.map((d) => (
+                        <span key={d} className="badge badge-violet">
+                          {d}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="m-0 mb-2 text-[var(--text-secondary)]">{result.skin.insight}</p>
+                    <ul className="m-0 mt-2 pl-4 text-[12.5px] text-[var(--text-muted)] space-y-1">
+                      {result.skin.suggestions?.map((s) => (
+                        <li key={s}>{s}</li>
+                      ))}
+                    </ul>
+                  </ResultBox>
+                ) : (
+                  <EmptyState message="No skin analysis yet" />
+                )}
+              </div>
             </div>
           </div>
 
           <SectionTitle>Lifestyle & Nutrition</SectionTitle>
-          <div
-            className="fade-up d3"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-              gap: 14,
-              marginBottom: 40,
-            }}
-          >
-            <div className="glass" style={{ padding: 24 }}>
+          <div className="fade-up d3 grid grid-cols-1 lg:grid-cols-2 gap-4 mb-10 items-stretch">
+            <div className="glass p-5 sm:p-6 flex flex-col h-full">
               <SectionHeader icon="🌿" title="Lifestyle Report" badge="Holistic" badgeColor="amber" />
-              {result.lifestyle ? (
-                <ResultBox>
-                  <div style={{ marginBottom: 8 }}>
-                    <span className="badge badge-amber mono">Score {result.lifestyle.lifestyleScore}</span>
-                  </div>
-                  <p style={{ margin: "0 0 10px", color: "var(--text-secondary)" }}>{result.lifestyle.insight}</p>
-                  <ul style={{ margin: "10px 0 0", paddingLeft: 18, color: "var(--text-muted)", fontSize: 12.5 }}>
-                    {result.lifestyle.explanations?.map((e) => (
-                      <li key={e} style={{ marginBottom: 4 }}>{e}</li>
-                    ))}
-                  </ul>
-                </ResultBox>
-              ) : (
-                <EmptyState message="No lifestyle analysis yet" />
-              )}
+              <div className="flex-1 mt-2">
+                {result.lifestyle ? (
+                  <ResultBox>
+                    <div className="mb-2">
+                      <span className="badge badge-amber mono">Score {result.lifestyle.lifestyleScore}</span>
+                    </div>
+                    <p className="m-0 mb-2 text-[var(--text-secondary)]">{result.lifestyle.insight}</p>
+                    <ul className="m-0 mt-2 pl-4 text-[12.5px] text-[var(--text-muted)] space-y-1">
+                      {result.lifestyle.explanations?.map((e) => (
+                        <li key={e}>{e}</li>
+                      ))}
+                    </ul>
+                  </ResultBox>
+                ) : (
+                  <EmptyState message="No lifestyle analysis yet" />
+                )}
+              </div>
             </div>
 
-            <div className="glass" style={{ padding: 24 }}>
+            <div className="glass p-5 sm:p-6 flex flex-col h-full">
               <SectionHeader icon="🥗" title="Latest Meal" badge="Food AI" badgeColor="violet" />
-              {result.food ? (
-                <ResultBox>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
-                    <span style={{ fontWeight: 600, color: "var(--violet)" }}>{result.food.food}</span>
-                    <span className="badge badge-cyan mono">{result.food.estimatedCalories} kcal</span>
-                  </div>
-                  <p style={{ margin: 0, color: "var(--text-secondary)" }}>{result.food.insight}</p>
-                </ResultBox>
-              ) : (
-                <EmptyState message="No meal logged yet — try the Diet & Calories page" />
-              )}
+              <div className="flex-1 mt-2">
+                {result.food ? (
+                  <ResultBox>
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <span className="font-semibold text-[var(--violet)]">{result.food.food}</span>
+                      <span className="badge badge-cyan mono">{result.food.estimatedCalories} kcal</span>
+                    </div>
+                    <p className="m-0 text-[var(--text-secondary)]">{result.food.insight}</p>
+                  </ResultBox>
+                ) : (
+                  <EmptyState message="No meal logged yet — try the Diet & Calories page" />
+                )}
+              </div>
             </div>
           </div>
         </>

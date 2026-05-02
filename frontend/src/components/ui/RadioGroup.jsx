@@ -16,7 +16,7 @@ export default function RadioGroup({ options, value, onChange, color = "cyan" })
   const c = colorMap[color] || colorMap.cyan;
 
   return (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }} role="radiogroup">
+    <div className="flex flex-wrap gap-2" role="radiogroup">
       {options.map((opt) => {
         const isActive = value === opt.value;
         return (
@@ -25,26 +25,16 @@ export default function RadioGroup({ options, value, onChange, color = "cyan" })
             role="radio"
             aria-checked={isActive}
             onClick={() => onChange(opt.value)}
+            className="inline-flex items-center gap-1.5 py-2 px-4 rounded-full font-syne font-semibold text-[13px] cursor-pointer transition-all duration-200 outline-none hover:-translate-y-[1px]"
             style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              padding: "8px 16px",
-              borderRadius: 999,
               border: `1px solid ${isActive ? c.border : "var(--border)"}`,
               background: isActive ? c.dim : "var(--bg-surface)",
               color: isActive ? c.active : "var(--text-secondary)",
-              fontFamily: "'Syne', sans-serif",
-              fontWeight: 600,
-              fontSize: 13,
-              cursor: "pointer",
-              transition: "all 0.18s",
               boxShadow: isActive ? `0 0 12px ${c.glow}` : "none",
-              outline: "none",
             }}
             onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onChange(opt.value); }}
           >
-            {opt.icon && <span style={{ fontSize: 15 }}>{opt.icon}</span>}
+            {opt.icon && <span className="text-[15px]">{opt.icon}</span>}
             {opt.label}
           </button>
         );

@@ -12,39 +12,35 @@ const progressMap = {
 
 export default function HabitCard({ habitItems }) {
   return (
-    <div className="glass" style={{ padding: 24 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
-        <span style={{ fontSize: 18 }}>🎯</span>
-        <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, color: "var(--text-primary)" }}>
+    <div className="glass p-4 sm:p-6 h-full flex flex-col">
+      <div className="flex items-center gap-2 mb-5">
+        <span className="text-lg">🎯</span>
+        <span className="font-syne font-bold text-[15px] text-[var(--text-primary)]">
           Daily Habits
         </span>
-        <span className="badge badge-emerald" style={{ marginLeft: "auto", fontSize: 10 }}>Today</span>
+        <span className="badge badge-emerald ml-auto text-[10px]">Today</span>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+      <div className="flex flex-col gap-4 flex-1">
         {habits.map(({ key, label, icon, unit, color, accent }) => {
           const { done, pct } = progressMap[key];
           const checked = habitItems?.[key] ?? done;
           return (
             <div key={key}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <div style={{
-                    width: 32, height: 32, borderRadius: 9, background: accent,
-                    display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15,
-                  }}>{icon}</div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-[15px]" style={{ background: accent }}>
+                    {icon}
+                  </div>
                   <div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{label}</div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{unit}</div>
+                    <div className="text-[13px] font-semibold text-[var(--text-primary)]">{label}</div>
+                    <div className="text-[11px] text-[var(--text-muted)]">{unit}</div>
                   </div>
                 </div>
-                <div style={{
-                  width: 22, height: 22, borderRadius: "50%",
+                <div className="w-5 h-5 rounded-full flex items-center justify-center text-[11px] transition-all duration-300" style={{
                   background: checked ? `${color}22` : "var(--border)",
                   border: `2px solid ${checked ? color : "var(--border)"}`,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 11, color: checked ? color : "var(--text-muted)",
-                  transition: "all 0.3s",
+                  color: checked ? color : "var(--text-muted)",
                 }}>
                   {checked ? "✓" : ""}
                 </div>
@@ -55,8 +51,8 @@ export default function HabitCard({ habitItems }) {
                   style={{ width: `${checked ? pct : Math.floor(pct * 0.6)}%`, background: `linear-gradient(90deg, ${color}aa, ${color})` }}
                 />
               </div>
-              <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 4 }}>
-                <span style={{ fontSize: 10, color, fontFamily: "'JetBrains Mono',monospace", fontWeight: 600 }}>
+              <div className="flex justify-end mt-1">
+                <span className="text-[10px] font-mono font-semibold" style={{ color }}>
                   {checked ? pct : Math.floor(pct * 0.6)}%
                 </span>
               </div>

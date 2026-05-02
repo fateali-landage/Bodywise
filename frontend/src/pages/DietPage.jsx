@@ -42,70 +42,57 @@ export default function DietPage() {
       />
 
       <SectionTitle>Food Intelligence</SectionTitle>
-      <div className="fade-up d2 glass" style={{ padding: 28, marginBottom: 40 }}>
+      <div className="fade-up d2 glass p-6 sm:p-8 mb-10">
         <SectionHeader icon="🥗" title="Meal Analyzer" badge="Nutrition AI" badgeColor="violet" />
-        <FieldLabel>Describe your meal</FieldLabel>
-        <input
-          className="field-input"
-          value={food}
-          onChange={(e) => setFood(e.target.value)}
-          placeholder="e.g. grilled chicken salad with olive oil"
-        />
-        <ActionButton
-          onClick={runFood}
-          loading={loading.food}
-          color="violet"
-          disabled={!food.trim()}
-        >
-          {loading.food ? "Analyzing…" : "Analyze Food"}
-        </ActionButton>
+        <div className="mt-4">
+          <FieldLabel>Describe your meal</FieldLabel>
+          <input
+            className="field-input w-full mt-1.5"
+            value={food}
+            onChange={(e) => setFood(e.target.value)}
+            placeholder="e.g. grilled chicken salad with olive oil"
+          />
+          <ActionButton
+            onClick={runFood}
+            loading={loading.food}
+            color="violet"
+            disabled={!food.trim()}
+            className="w-full sm:w-auto mt-3"
+          >
+            {loading.food ? "Analyzing…" : "Analyze Food"}
+          </ActionButton>
+        </div>
 
-        {result.food ? (
-          <ResultBox>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
-              <span style={{ fontWeight: 600, color: "var(--violet)" }}>{result.food.food}</span>
-              <span className="badge badge-cyan mono">{result.food.estimatedCalories} kcal</span>
-            </div>
-            {result.food.macros && (
-              <div className="mono" style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 8 }}>
-                P {result.food.macros.protein} · C {result.food.macros.carbs} · F {result.food.macros.fats}
+        <div className="mt-6">
+          {result.food ? (
+            <ResultBox>
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <span className="font-semibold text-[var(--violet)]">{result.food.food}</span>
+                <span className="badge badge-cyan mono">{result.food.estimatedCalories} kcal</span>
               </div>
-            )}
-            <p style={{ margin: 0, color: "var(--text-secondary)" }}>{result.food.insight}</p>
-          </ResultBox>
-        ) : (
-          <EmptyState message="Enter a meal description and analyze to see nutritional insights" />
-        )}
+              {result.food.macros && (
+                <div className="mono text-xs text-[var(--text-muted)] mb-2">
+                  P {result.food.macros.protein} · C {result.food.macros.carbs} · F {result.food.macros.fats}
+                </div>
+              )}
+              <p className="m-0 text-[var(--text-secondary)]">{result.food.insight}</p>
+            </ResultBox>
+          ) : (
+            <EmptyState message="Enter a meal description and analyze to see nutritional insights" />
+          )}
+        </div>
       </div>
 
       <SectionTitle>Daily Habits</SectionTitle>
-      <div className="fade-up d3 glass" style={{ padding: 28 }}>
+      <div className="fade-up d3 glass p-6 sm:p-8">
         <SectionHeader icon="📋" title="Daily Habit Coach" badge="Today" badgeColor="emerald" />
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        <div className="flex flex-col gap-1.5 mt-4">
           {Object.keys(habitItems).map((item) => (
             <div
               key={item}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "12px 14px",
-                borderRadius: "var(--radius-md)",
-                background: "var(--bg-surface)",
-                border: "1px solid var(--border)",
-                transition: "background 0.15s",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-surface-hover)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "var(--bg-surface)")}
+              className="flex items-center justify-between py-3 px-3.5 rounded-[var(--radius-md)] bg-[var(--bg-surface)] border border-[var(--border)] hover:bg-[var(--bg-surface-hover)] transition-colors"
             >
-              <span
-                style={{
-                  fontSize: 13.5,
-                  fontWeight: 500,
-                  textTransform: "capitalize",
-                  color: "var(--text-primary)",
-                }}
-              >
+              <span className="text-[13.5px] font-medium capitalize text-[var(--text-primary)]">
                 {HABIT_ICONS[item] || "•"} {item}
               </span>
               <Toggle
@@ -116,16 +103,20 @@ export default function DietPage() {
             </div>
           ))}
         </div>
-        <ActionButton onClick={saveHabit} loading={loading.habit} color="emerald">
-          {loading.habit ? "Saving…" : "Save Today's Habits"}
-        </ActionButton>
-        {result.habits?.length ? (
-          <p className="mono" style={{ marginTop: 12, fontSize: 11.5, color: "var(--text-muted)" }}>
-            {result.habits.length} entries stored
-          </p>
-        ) : (
-          <EmptyState message="No habit entries logged yet" />
-        )}
+        <div className="mt-4">
+          <ActionButton onClick={saveHabit} loading={loading.habit} color="emerald" className="w-full sm:w-auto">
+            {loading.habit ? "Saving…" : "Save Today's Habits"}
+          </ActionButton>
+        </div>
+        <div className="mt-3">
+          {result.habits?.length ? (
+            <p className="font-mono text-[11.5px] text-[var(--text-muted)] m-0 text-center sm:text-left">
+              {result.habits.length} entries stored
+            </p>
+          ) : (
+            <EmptyState message="No habit entries logged yet" />
+          )}
+        </div>
       </div>
     </>
   );

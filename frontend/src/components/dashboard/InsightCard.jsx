@@ -28,57 +28,46 @@ export default function InsightCard({ insight, loading }) {
   }, [insight]);
 
   return (
-    <div
-      className="glass glass-glow insight-glow"
-      style={{ padding: "28px 28px 24px", position: "relative", overflow: "hidden" }}
-    >
+    <div className="glass glass-glow insight-glow p-6 sm:p-7 pb-6 relative overflow-hidden h-full flex flex-col">
       {/* background decoration */}
-      <div style={{
-        position: "absolute", top: -40, right: -40, width: 160, height: 160,
-        borderRadius: "50%", background: "radial-gradient(circle, rgba(0,229,190,0.08) 0%, transparent 70%)",
-        pointerEvents: "none",
+      <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full pointer-events-none" style={{
+        background: "radial-gradient(circle, rgba(0,229,190,0.08) 0%, transparent 70%)"
       }} />
 
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-        <div style={{
-          width: 36, height: 36, borderRadius: 10,
+      <div className="flex items-center gap-2.5 mb-4 relative z-10">
+        <div className="w-9 h-9 rounded-lg flex items-center justify-center text-lg animate-[float_3s_ease-in-out_infinite]" style={{
           background: "linear-gradient(135deg, rgba(0,229,190,0.2), rgba(14,165,233,0.2))",
           border: "1px solid rgba(0,229,190,0.3)",
-          display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18,
-          animation: "float 3s ease-in-out infinite",
         }}>🧠</div>
         <div>
-          <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 14, color: "var(--text-primary)" }}>
+          <div className="font-syne font-bold text-sm text-[var(--text-primary)]">
             AI Health Insight
           </div>
-          <div className="section-label" style={{ marginTop: 2 }}>Powered by Gemini</div>
+          <div className="section-label mt-0.5">Powered by Gemini</div>
         </div>
-        <span className="badge badge-cyan" style={{ marginLeft: "auto" }}>
-          <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--cyan)", animation: "pulse 1.8s ease-in-out infinite" }} />
+        <span className="badge badge-cyan ml-auto">
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--cyan)] animate-[pulse_1.8s_ease-in-out_infinite]" />
           Live
         </span>
       </div>
 
-      {loading ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <div className="skeleton" style={{ height: 14, width: "90%", borderRadius: 6 }} />
-          <div className="skeleton" style={{ height: 14, width: "70%", borderRadius: 6 }} />
-          <div className="skeleton" style={{ height: 14, width: "80%", borderRadius: 6 }} />
-        </div>
-      ) : (
-        <p style={{
-          margin: 0, fontSize: 14, lineHeight: 1.7,
-          color: "var(--text-secondary)",
-          opacity: fade ? 1 : 0,
-          transition: "opacity 0.22s ease",
-        }}>
-          "{displayed}"
-        </p>
-      )}
+      <div className="flex-1 relative z-10">
+        {loading ? (
+          <div className="flex flex-col gap-2">
+            <div className="skeleton h-3.5 w-[90%] rounded-md" />
+            <div className="skeleton h-3.5 w-[70%] rounded-md" />
+            <div className="skeleton h-3.5 w-[80%] rounded-md" />
+          </div>
+        ) : (
+          <p className={`m-0 text-sm leading-relaxed text-[var(--text-secondary)] transition-opacity duration-200 ${fade ? 'opacity-100' : 'opacity-0'}`}>
+            "{displayed}"
+          </p>
+        )}
+      </div>
 
-      <div style={{ marginTop: 16, display: "flex", gap: 8, flexWrap: "wrap" }}>
+      <div className="mt-4 flex gap-2 flex-wrap relative z-10">
         {["Nutrition", "Recovery", "Lifestyle"].map((tag) => (
-          <span key={tag} className="badge badge-cyan" style={{ fontSize: 10 }}>{tag}</span>
+          <span key={tag} className="badge badge-cyan text-[10px]">{tag}</span>
         ))}
       </div>
     </div>

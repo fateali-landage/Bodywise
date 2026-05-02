@@ -25,11 +25,11 @@ function CalorieRing({ consumed, target }) {
           style={{ filter: `drop-shadow(0 0 8px ${color}80)`, transition: "stroke-dasharray 0.8s cubic-bezier(0.4,0,0.2,1)" }}
         />
       </svg>
-      <div style={{ textAlign: "center", zIndex: 1 }}>
-        <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 24, color, lineHeight: 1 }}>
+      <div className="text-center relative z-10">
+        <div className="font-syne font-extrabold text-2xl leading-none" style={{ color }}>
           {consumed}
         </div>
-        <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 4, letterSpacing: "0.05em" }}>of {target}</div>
+        <div className="text-[10px] text-[var(--text-muted)] mt-1 tracking-wider">of {target}</div>
       </div>
     </div>
   );
@@ -151,51 +151,51 @@ export default function CalorieTrackerPage() {
       />
 
       {/* ── Summary & Smart Feedback ── */}
-      <div className="fade-up d1 glass" style={{ padding: "16px 24px", marginBottom: 24, display: "flex", alignItems: "center", gap: 12, borderLeft: `4px solid ${feedback.color}` }}>
-        <span style={{ fontSize: 20 }}>💡</span>
-        <div style={{ fontSize: 14, color: "var(--text-primary)", fontWeight: 500 }}>{feedback.msg}</div>
+      <div className="fade-up d1 glass py-4 px-5 sm:px-6 mb-6 flex items-center gap-3 border-l-4" style={{ borderLeftColor: feedback.color }}>
+        <span className="text-xl">💡</span>
+        <div className="text-sm text-[var(--text-primary)] font-medium">{feedback.msg}</div>
         {protein < 50 && consumed > 500 && (
-          <span className="badge badge-amber" style={{ marginLeft: "auto" }}>Low on Protein</span>
+          <span className="badge badge-amber ml-auto">Low on Protein</span>
         )}
       </div>
 
-      <div className="fade-up d2" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 14, marginBottom: 32 }}>
+      <div className="fade-up d2 grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         {[
           { label: "Target",    value: DAILY_TARGET, color: "var(--cyan)",    icon: "🎯" },
           { label: "Consumed",  value: consumed,      color: "var(--violet)",  icon: "🍽️" },
           { label: "Remaining", value: remaining,     color: over ? "var(--red)" : "var(--emerald)", icon: over ? "⚠️" : "✅" },
         ].map(({ label, value, color, icon }) => (
-          <div key={label} className="glass" style={{ padding: "20px 24px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-              <div style={{ fontSize: 12, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600 }}>{label}</div>
-              <div style={{ fontSize: 18 }}>{icon}</div>
+          <div key={label} className="glass p-5 sm:p-6">
+            <div className="flex justify-between items-start mb-3">
+              <div className="text-xs text-[var(--text-muted)] uppercase tracking-wider font-semibold">{label}</div>
+              <div className="text-lg">{icon}</div>
             </div>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-              <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 32, color, lineHeight: 1 }}>{value.toLocaleString()}</div>
-              <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 500 }}>kcal</div>
+            <div className="flex items-baseline gap-1.5">
+              <div className="font-syne font-extrabold text-3xl leading-none" style={{ color }}>{value.toLocaleString()}</div>
+              <div className="text-xs text-[var(--text-muted)] font-medium">kcal</div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="fade-up d3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 32 }}>
+      <div className="fade-up d3 grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
         
         {/* Progress & Macros */}
-        <div className="glass" style={{ padding: 24, display: "grid", gridTemplateColumns: "140px 1fr", gap: 32, alignItems: "center" }}>
+        <div className="glass p-5 sm:p-6 flex flex-col sm:flex-row gap-8 items-center sm:items-start h-full">
           <CalorieRing consumed={consumed} target={DAILY_TARGET} />
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16, color: "var(--text-primary)" }}>Macronutrients</div>
+          <div className="flex flex-col gap-4 w-full">
+            <div className="font-syne font-bold text-base text-[var(--text-primary)]">Macronutrients</div>
             {[
               { label: "Protein", val: protein, color: "#00e5be", max: 150 },
               { label: "Carbs",   val: carbs,   color: "#a78bfa", max: 250 },
               { label: "Fats",    val: fats,    color: "#fbbf24", max: 80 },
             ].map(m => (
               <div key={m.label}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 6 }}>
-                  <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}>{m.label}</span>
-                  <span style={{ fontFamily: "'JetBrains Mono',monospace", color: m.color, fontWeight: 600 }}>{m.val}g</span>
+                <div className="flex justify-between text-xs mb-1.5">
+                  <span className="text-[var(--text-secondary)] font-medium">{m.label}</span>
+                  <span className="font-mono font-semibold" style={{ color: m.color }}>{m.val}g</span>
                 </div>
-                <div className="progress-bar-track" style={{ height: 6 }}>
+                <div className="progress-bar-track h-1.5">
                   <div className="progress-bar-fill" style={{ width: `${Math.min((m.val / m.max) * 100, 100)}%`, background: m.color }} />
                 </div>
               </div>
@@ -204,77 +204,77 @@ export default function CalorieTrackerPage() {
         </div>
 
         {/* Add Food Form */}
-        <div className="glass" style={{ padding: 24 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
-            <span style={{ fontSize: 18 }}>➕</span>
-            <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16, color: "var(--text-primary)" }}>Add Food Entry</span>
+        <div className="glass p-5 sm:p-6 h-full">
+          <div className="flex items-center gap-2 mb-5">
+            <span className="text-lg">➕</span>
+            <span className="font-syne font-bold text-base text-[var(--text-primary)]">Add Food Entry</span>
           </div>
 
-          {error && <div style={{ padding: "8px 12px", marginBottom: 12, borderRadius: "var(--radius-sm)", background: "var(--red-dim)", border: "1px solid rgba(248,113,113,0.25)", color: "var(--red)", fontSize: 12 }}>⚠ {error}</div>}
+          {error && <div className="p-2.5 mb-3 rounded-[var(--radius-sm)] bg-[var(--red-dim)] border border-[rgba(248,113,113,0.25)] text-[var(--red)] text-xs">⚠ {error}</div>}
 
-          <div style={{ marginBottom: 16 }}>
+          <div className="mb-4">
             <FieldLabel>Meal Type</FieldLabel>
-            <div style={{ marginTop: 6 }}>
+            <div className="mt-1.5">
               <RadioGroup options={MEAL_OPTS} value={mealType} onChange={setMealType} color="cyan" />
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 100px", gap: 10, marginBottom: 16 }}>
+          <div className="grid grid-cols-1 sm:grid-cols-[1fr_100px] gap-2.5 mb-4">
             <div>
               <FieldLabel>Food Name</FieldLabel>
-              <input className="field-input" value={food} onChange={(e) => setFood(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleAdd()} placeholder="e.g. 2 eggs, banana" />
+              <input className="field-input w-full" value={food} onChange={(e) => setFood(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleAdd()} placeholder="e.g. 2 eggs, banana" />
             </div>
             <div>
               <FieldLabel>Quantity</FieldLabel>
-              <input className="field-input" value={qty} type="number" min="0.1" step="0.5" onChange={(e) => setQty(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleAdd()} />
+              <input className="field-input w-full" value={qty} type="number" min="0.1" step="0.5" onChange={(e) => setQty(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleAdd()} />
             </div>
           </div>
 
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <ActionButton onClick={handleAdd} loading={submitting} color="cyan">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
+            <ActionButton onClick={handleAdd} loading={submitting} color="cyan" className="w-full sm:w-auto">
               {submitting ? "Adding..." : "+ Add to Log"}
             </ActionButton>
-            <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Auto-estimates kcal & macros</div>
+            <div className="text-[11px] text-[var(--text-muted)] text-center sm:text-left">Auto-estimates kcal & macros</div>
           </div>
         </div>
       </div>
 
-      <div className="fade-up d4" style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 14, marginBottom: 40, alignItems: "start" }}>
+      <div className="fade-up d4 grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-4 mb-10 items-start">
         
         {/* Structured Food Log */}
-        <div className="glass" style={{ padding: 24 }}>
+        <div className="glass p-5 sm:p-6">
           <SectionTitle>Today's Log</SectionTitle>
           {loading ? (
-            <div style={{ display: "flex", justifyContent: "center", padding: 40 }}><Spinner /></div>
+            <div className="flex justify-center p-10"><Spinner /></div>
           ) : log.length === 0 ? (
             <div className="empty-state">No meals logged yet today.</div>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+            <div className="flex flex-col gap-6">
               {MEAL_OPTS.map(meal => {
                 const items = groupedLogs[meal.value];
                 if (!items || items.length === 0) return null;
                 const mealCals = items.reduce((s, i) => s + (i.calories||0), 0);
                 return (
                   <div key={meal.value}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, paddingBottom: 8, borderBottom: "1px solid var(--border)" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>
+                    <div className="flex justify-between items-center mb-3 pb-2 border-b border-[var(--border)]">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
                         <span>{meal.icon}</span> {meal.label}
                       </div>
-                      <span style={{ fontSize: 13, fontFamily: "'JetBrains Mono',monospace", color: "var(--cyan)", fontWeight: 600 }}>{mealCals} kcal</span>
+                      <span className="text-[13px] font-mono font-semibold text-[var(--cyan)]">{mealCals} kcal</span>
                     </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    <div className="flex flex-col gap-2">
                       {items.map(entry => (
-                        <div key={entry.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "var(--bg-surface)", borderRadius: "var(--radius-sm)", transition: "background 0.2s" }} onMouseEnter={e => e.currentTarget.style.background="var(--bg-surface-hover)"} onMouseLeave={e => e.currentTarget.style.background="var(--bg-surface)"}>
+                        <div key={entry.id} className="flex justify-between items-center p-2 sm:px-3 bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-hover)] rounded-[var(--radius-sm)] transition-colors">
                           <div>
-                            <div style={{ fontSize: 13.5, fontWeight: 500, color: "var(--text-primary)", textTransform: "capitalize" }}>{entry.food_name}</div>
-                            <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>Qty: {entry.quantity} · {new Date(entry.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                            <div className="text-[13.5px] font-medium text-[var(--text-primary)] capitalize">{entry.food_name}</div>
+                            <div className="text-[11px] text-[var(--text-muted)] mt-0.5">Qty: {entry.quantity} · {new Date(entry.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
                           </div>
-                          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                            <div style={{ textAlign: "right" }}>
-                              <div style={{ fontSize: 13, fontFamily: "'JetBrains Mono',monospace", fontWeight: 600, color: "var(--text-primary)" }}>{entry.calories} kcal</div>
-                              <div style={{ fontSize: 10, color: "var(--text-muted)" }}>P:{entry.protein} C:{entry.carbs} F:{entry.fats}</div>
+                          <div className="flex items-center gap-2 sm:gap-3">
+                            <div className="text-right">
+                              <div className="text-[13px] font-mono font-semibold text-[var(--text-primary)]">{entry.calories} kcal</div>
+                              <div className="text-[10px] text-[var(--text-muted)]">P:{entry.protein} C:{entry.carbs} F:{entry.fats}</div>
                             </div>
-                            <button onClick={() => handleDelete(entry.id)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 16, padding: "4px" }} aria-label="Delete">✕</button>
+                            <button onClick={() => handleDelete(entry.id)} className="bg-transparent border-none text-[var(--text-muted)] cursor-pointer text-base p-1 hover:text-[var(--red)] transition-colors" aria-label="Delete">✕</button>
                           </div>
                         </div>
                       ))}
@@ -287,9 +287,9 @@ export default function CalorieTrackerPage() {
         </div>
 
         {/* Weekly Analytics Chart */}
-        <div className="glass" style={{ padding: 24, position: "sticky", top: 24 }}>
+        <div className="glass p-5 sm:p-6 lg:sticky lg:top-6">
           <SectionTitle>Weekly Intake</SectionTitle>
-          <div style={{ height: 220, marginTop: 16, marginLeft: -16 }}>
+          <div className="h-[220px] mt-4 -ml-4 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={weeklyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
@@ -304,11 +304,11 @@ export default function CalorieTrackerPage() {
               </LineChart>
             </ResponsiveContainer>
           </div>
-          <div style={{ marginTop: 20 }}>
-            <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>Quick Actions</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <button className="btn btn-ghost" style={{ width: "100%", justifyContent: "center", fontSize: 12, padding: "8px" }}>Repeat Yesterday's Meals</button>
-              <button className="btn btn-ghost" style={{ width: "100%", justifyContent: "center", fontSize: 12, padding: "8px" }}>Add from Favorites ⭐</button>
+          <div className="mt-5">
+            <div className="text-xs text-[var(--text-muted)] mb-2 uppercase tracking-wider font-semibold">Quick Actions</div>
+            <div className="flex flex-col sm:flex-row lg:flex-col gap-2">
+              <button className="btn btn-ghost w-full justify-center text-xs p-2">Repeat Yesterday's Meals</button>
+              <button className="btn btn-ghost w-full justify-center text-xs p-2">Add from Favorites ⭐</button>
             </div>
           </div>
         </div>

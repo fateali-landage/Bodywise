@@ -74,45 +74,38 @@ export default function AICoachPage() {
 
       <ErrorBanner message={error} onDismiss={() => setError(null)} />
 
-      <div className="glass" style={{ display: "flex", flexDirection: "column", height: "60vh", padding: 20 }}>
-        <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 16, marginBottom: 16 }}>
+      <div className="glass flex flex-col h-[60vh] sm:h-[70vh] p-4 sm:p-5 relative">
+        <div className="flex-1 overflow-y-auto flex flex-col gap-4 mb-4 pr-2">
           {messages.map((msg, idx) => (
             <div 
               key={idx} 
-              style={{
-                alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
-                background: msg.role === "user" ? "var(--cyan)" : "rgba(255,255,255,0.06)",
-                color: msg.role === "user" ? "#000" : "var(--text-primary)",
-                padding: "12px 16px",
-                borderRadius: 12,
-                maxWidth: "80%",
-                lineHeight: 1.5,
-                fontSize: 15,
-                whiteSpace: "pre-wrap"
-              }}
+              className={`py-3 px-4 rounded-[12px] max-w-[85%] sm:max-w-[75%] leading-relaxed text-[14px] sm:text-[15px] whitespace-pre-wrap ${
+                msg.role === "user" 
+                  ? "self-end bg-[var(--cyan)] text-black" 
+                  : "self-start bg-white/5 text-[var(--text-primary)]"
+              }`}
             >
               {msg.text}
             </div>
           ))}
           {loading && (
-            <div style={{ alignSelf: "flex-start", padding: "12px 16px", background: "rgba(255,255,255,0.06)", borderRadius: 12 }}>
+            <div className="self-start py-3 px-4 bg-white/5 text-[var(--text-muted)] rounded-[12px] text-[14px] sm:text-[15px]">
               Typing...
             </div>
           )}
           <div ref={messagesEndRef} />
         </div>
 
-        <div style={{ display: "flex", gap: 12 }}>
+        <div className="flex gap-2.5 mt-auto pt-2">
           <input 
             type="text" 
-            className="field-input" 
+            className="field-input flex-1" 
             placeholder="Type your message..." 
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            style={{ flex: 1 }}
           />
-          <ActionButton onClick={handleSend} disabled={!input.trim() || loading}>
+          <ActionButton onClick={handleSend} disabled={!input.trim() || loading} className="m-0">
             Send
           </ActionButton>
         </div>

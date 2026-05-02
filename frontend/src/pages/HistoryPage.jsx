@@ -43,22 +43,22 @@ export default function HistoryPage() {
         description="Track your past analysis, calories, and BMI changes." 
       />
 
-      {error && <div style={{ color: "var(--red)", marginBottom: 16 }}>{error}</div>}
+      {error && <div className="text-[var(--red)] mb-4">{error}</div>}
 
       {loading ? (
-        <div style={{ display: "flex", justifyContent: "center", padding: 40 }}><Spinner /></div>
+        <div className="flex justify-center p-10"><Spinner /></div>
       ) : history.length === 0 ? (
-        <div className="glass" style={{ padding: 24, marginTop: 24 }}>
-          <h2 className="display" style={{ fontSize: 18, marginBottom: 16 }}>Trends coming soon</h2>
+        <div className="glass p-6 mt-6">
+          <h2 className="display text-lg mb-4">Trends coming soon</h2>
           <EmptyState message="You don't have enough data to display historical trends yet." />
         </div>
       ) : (
-        <div className="fade-up d2" style={{ display: "flex", flexDirection: "column", gap: 24, marginTop: 24 }}>
+        <div className="fade-up d2 flex flex-col gap-6 mt-6">
           
-          <div className="glass" style={{ padding: 24 }}>
+          <div className="glass p-5 sm:p-6">
             <SectionTitle>BMI Progression</SectionTitle>
             {bmiData.length > 1 ? (
-              <div style={{ height: 260, marginTop: 16 }}>
+              <div className="h-[260px] mt-4 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={bmiData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
@@ -77,16 +77,16 @@ export default function HistoryPage() {
             )}
           </div>
 
-          <div className="glass" style={{ padding: 24 }}>
+          <div className="glass p-5 sm:p-6">
             <SectionTitle>Past Analysis Results</SectionTitle>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div className="flex flex-col gap-3 mt-4">
               {history.map((item, idx) => (
-                <div key={idx} style={{ padding: 16, background: "var(--bg-surface)", borderRadius: "var(--radius-md)" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                    <span style={{ textTransform: "capitalize", fontWeight: 600, color: "var(--text-primary)" }}>{item.type} Analysis</span>
-                    <span style={{ fontSize: 12, color: "var(--text-muted)" }}>{item.date}</span>
+                <div key={idx} className="p-4 bg-[var(--bg-surface)] rounded-[var(--radius-md)]">
+                  <div className="flex justify-between mb-2">
+                    <span className="capitalize font-semibold text-[var(--text-primary)]">{item.type} Analysis</span>
+                    <span className="text-xs text-[var(--text-muted)]">{item.date}</span>
                   </div>
-                  <div style={{ fontSize: 14, color: "var(--text-secondary)" }}>
+                  <div className="text-sm text-[var(--text-secondary)]">
                     {item.data?.insight || "No insight available."}
                   </div>
                 </div>

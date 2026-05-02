@@ -43,11 +43,11 @@ export default function Sidebar({ user, onSignOut, open, onNavigate }) {
       <div className="sidebar-footer">
         {user?.email && (
           <div>
-            <div className="section-label" style={{ marginBottom: 4 }}>Signed in</div>
+            <div className="section-label mb-1">Signed in</div>
             <div className="user-email">{user.email}</div>
           </div>
         )}
-        <button className="btn btn-ghost" style={{ marginTop: 0 }} onClick={onSignOut}>
+        <button className="btn btn-ghost mt-0 w-full justify-center" onClick={onSignOut}>
           Sign out
         </button>
       </div>
