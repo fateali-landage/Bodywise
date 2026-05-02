@@ -65,4 +65,6 @@ export const getDailyFoodLog  = (userId, date) => api.get(`/api/food-logs?userId
 export const addFoodLog       = (payload) => api.post("/api/food-logs", payload);
 export const deleteFoodLog    = (id)      => api.delete(`/api/food-logs/${id}`);
 
+export const getHistory       = ()        => api.get("/api/history");
+
 export default api;

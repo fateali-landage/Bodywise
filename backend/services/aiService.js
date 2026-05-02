@@ -53,3 +53,39 @@ Give clear, short insight and recommendation.
     return mockInsight(data);
   }
 };
+
+export const generateChatResponse = async (message, context) => {
+  if (!genAI) {
+    return "I am running in offline mode. Please configure the Gemini API key to chat with me!";
+  }
+
+  try {
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash",
+    });
+
+    const prompt = `You are BodyWise AI, a personal health and wellness coach.
+You give professional, practical, and empathetic advice regarding fitness, diet, sleep, and overall wellness.
+Keep your responses concise and formatted cleanly with markdown.
+
+User Context Data:
+${JSON.stringify(context || {})}
+
+User Message:
+${message}
+`;
+
+    const result = await model.generateContent(prompt);
+    const response = result?.response;
+
+    let text =
+      response?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      (typeof response?.text === "function" ? response.text() : "") ||
+      "";
+
+    return text || "I am unable to formulate a response right now. Please try again.";
+  } catch (error) {
+    console.error("🔥 Gemini chat error:", error?.message || error);
+    return "An error occurred while generating a response. Please check the server logs.";
+  }
+};

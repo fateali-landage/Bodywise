@@ -10,6 +10,8 @@ import DietPlanPage from "./pages/DietPlanPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import ProfilePage from "./pages/ProfilePage";
 import ResultsPage from "./pages/ResultsPage";
+import AICoachPage from "./pages/AICoachPage";
+import HistoryPage from "./pages/HistoryPage";
 
 export default function App() {
   const { user, loading } = useAuth();
@@ -32,6 +34,8 @@ export default function App() {
         <Route path="/results"  element={<ResultsPage />} />
         <Route path="/diet"     element={<DietPlanPage />} />
         <Route path="/calories" element={<CalorieTrackerPage />} />
+        <Route path="/coach"    element={<AICoachPage />} />
+        <Route path="/history"  element={<HistoryPage />} />
         <Route path="/profile"  element={<ProfilePage />} />
         <Route path="*"         element={<NotFoundPage />} />
       </Route>

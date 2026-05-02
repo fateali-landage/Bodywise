@@ -6,6 +6,8 @@ const NAV_ITEMS = [
   { to: "/results",  label: "Results",        icon: "📊" },
   { to: "/diet",     label: "Diet Plan",      icon: "🥗" },
   { to: "/calories", label: "Calorie Tracker",icon: "🔥" },
+  { to: "/coach",    label: "AI Coach",       icon: "🤖" },
+  { to: "/history",  label: "Health History", icon: "📊" },
   { to: "/profile",  label: "Profile",        icon: "👤" },
 ];
 

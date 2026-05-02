@@ -5,10 +5,12 @@ import {
   analyzeLifestyle,
   analyzeSkin,
   predictHealth,
+  getHistory
 } from "../controllers/analyzeController.js";
 import { createHabit, listHabits } from "../controllers/habitController.js";
 import { getAiInsights } from "../controllers/aiInsightsController.js";
 import { getDailyFoodLog, addFoodLog, deleteFoodLog } from "../controllers/foodLogController.js";
+import { handleAiChat } from "../controllers/chatController.js";
 import { requireAuth } from "../middleware/authMiddleware.js";
 
 const router = Router();
@@ -25,5 +27,7 @@ router.post("/habits",        requireAuth, createHabit);
 router.get("/food-logs",      requireAuth, getDailyFoodLog);
 router.post("/food-logs",     requireAuth, addFoodLog);
 router.delete("/food-logs/:id", requireAuth, deleteFoodLog);
+router.post("/ai-chat",       requireAuth, handleAiChat);
+router.get("/history",        requireAuth, getHistory);
 
 export default router;

@@ -6,6 +6,7 @@
 import { generateInsight } from "../services/aiService.js";
 import { bmiStatus, calculateBmi } from "../services/healthService.js";
 import { sanitizeHealthPayload, sanitizeText, sanitizeNumber } from "../utils/sanitize.js";
+import { supabaseAdmin } from "../config/supabase.js";
 
 // ── /api/analyze-body ─────────────────────────────────────────────────────────
 export const analyzeBody = async (req, res) => {
@@ -24,18 +25,29 @@ export const analyzeBody = async (req, res) => {
       "You are BodyWise AI. Give practical, evidence-based body-health insights in 2-3 short sentences.",
     );
 
+    const responseData = {
+      bmi,
+      status: bmiStatus(bmi),
+      insight,
+      recommendations: [
+        "Keep hydration at 2.5–3 L/day.",
+        "Maintain at least 7 hours of sleep.",
+        "Include a protein source in every meal.",
+      ],
+    };
+
+    if (supabaseAdmin && req.user?.id) {
+      await supabaseAdmin.from("analysis_results").insert({
+        user_id: req.user.id,
+        type: "body",
+        data: responseData,
+        date: new Date().toISOString().slice(0, 10),
+      }).catch(e => console.error("Failed to save body analysis to DB", e));
+    }
+
     return res.json({
       success: true,
-      data: {
-        bmi,
-        status: bmiStatus(bmi),
-        insight,
-        recommendations: [
-          "Keep hydration at 2.5–3 L/day.",
-          "Maintain at least 7 hours of sleep.",
-          "Include a protein source in every meal.",
-        ],
-      },
+      data: responseData,
     });
   } catch (err) {
     console.error("[analyzeBody]", err);
@@ -55,18 +67,29 @@ export const analyzeSkin = async (req, res) => {
       "You are a skincare AI assistant. Give concise, non-medical wellness suggestions.",
     );
 
+    const responseData = {
+      detected: simulated,
+      concernLevel,
+      insight,
+      suggestions: [
+        "Use a gentle cleanser and non-comedogenic moisturiser.",
+        "Apply SPF 30+ every morning.",
+        "Prioritise 7–8 hours of sleep for skin recovery.",
+      ],
+    };
+
+    if (supabaseAdmin && req.user?.id) {
+      await supabaseAdmin.from("analysis_results").insert({
+        user_id: req.user.id,
+        type: "skin",
+        data: responseData,
+        date: new Date().toISOString().slice(0, 10),
+      }).catch(e => console.error("Failed to save skin analysis to DB", e));
+    }
+
     return res.json({
       success: true,
-      data: {
-        detected: simulated,
-        concernLevel,
-        insight,
-        suggestions: [
-          "Use a gentle cleanser and non-comedogenic moisturiser.",
-          "Apply SPF 30+ every morning.",
-          "Prioritise 7–8 hours of sleep for skin recovery.",
-        ],
-      },
+      data: responseData,
     });
   } catch (err) {
     console.error("[analyzeSkin]", err);
@@ -161,20 +184,55 @@ export const analyzeLifestyle = async (req, res) => {
       "You are a lifestyle scientist. Explain behaviour impact in 2–3 clear, evidence-based sentences.",
     );
 
+    const responseData = {
+      lifestyleScore: score,
+      explanations: [
+        "Consistent sleep supports hormone balance and skin repair.",
+        "Smoking reduces collagen and increases systemic inflammation.",
+        "High screen exposure may worsen eye strain and sleep quality.",
+      ],
+      insight,
+    };
+
+    if (supabaseAdmin && req.user?.id) {
+      await supabaseAdmin.from("analysis_results").insert({
+        user_id: req.user.id,
+        type: "lifestyle",
+        data: responseData,
+        date: new Date().toISOString().slice(0, 10),
+      }).catch(e => console.error("Failed to save lifestyle analysis to DB", e));
+    }
+
     return res.json({
       success: true,
-      data: {
-        lifestyleScore: score,
-        explanations: [
-          "Consistent sleep supports hormone balance and skin repair.",
-          "Smoking reduces collagen and increases systemic inflammation.",
-          "High screen exposure may worsen eye strain and sleep quality.",
-        ],
-        insight,
-      },
+      data: responseData,
     });
   } catch (err) {
     console.error("[analyzeLifestyle]", err);
     return res.status(500).json({ success: false, error: "Lifestyle analysis failed. Please try again." });
   }
 };
+
+// ── /api/history ──────────────────────────────────────────────────────────────
+export const getHistory = async (req, res) => {
+  try {
+    if (!supabaseAdmin) {
+      return res.json({ success: true, data: { analysis: [], calories: [] }, source: "mock" });
+    }
+    const userId = req.user?.id;
+    if (!userId) return res.status(400).json({ success: false, error: "userId is required" });
+
+    // Fetch analysis results
+    const { data: analysisData } = await supabaseAdmin
+      .from("analysis_results")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    return res.json({ success: true, data: { analysis: analysisData || [] } });
+  } catch (err) {
+    console.error("[getHistory]", err);
+    return res.status(500).json({ success: false, error: "Failed to fetch history" });
+  }
+};
+
