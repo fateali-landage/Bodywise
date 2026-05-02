@@ -27,7 +27,7 @@ router.post("/habits",        requireAuth, createHabit);
 router.get("/food-logs",      requireAuth, getDailyFoodLog);
 router.post("/food-logs",     requireAuth, addFoodLog);
 router.delete("/food-logs/:id", requireAuth, deleteFoodLog);
-router.post("/ai-chat",       requireAuth, handleAiChat);
+router.post("/ai/chat",       requireAuth, handleAiChat);
 router.get("/history",        requireAuth, getHistory);
 
 export default router;

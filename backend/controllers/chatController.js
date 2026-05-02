@@ -9,7 +9,7 @@ export const handleAiChat = async (req, res) => {
 
   try {
     const aiResponse = await generateChatResponse(message, context);
-    return res.json({ success: true, response: aiResponse });
+    return res.status(200).json({ success: true, reply: aiResponse });
   } catch (error) {
     console.error("Error in AI Chat:", error);
     return res.status(500).json({ success: false, error: "Failed to generate AI response" });

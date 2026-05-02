@@ -7,6 +7,9 @@ import rateLimit from "express-rate-limit";
 
 import apiRoutes from "./routes/apiRoutes.js";
 import { env } from "./config/env.js";
+import helmet from "helmet";
+import { sanitizeInputs } from "./middleware/sanitize.js";
+import { errorHandler } from "./middleware/errorHandler.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -36,8 +39,10 @@ app.use(
   }),
 );
 
-// ── Body parsing ───────────────────────────────────────────────────────────────
+// ── Body parsing & Security ───────────────────────────────────────────────────
+app.use(helmet());
 app.use(express.json({ limit: "5mb" }));
+app.use(sanitizeInputs);
 
 // ── Global rate limit ─────────────────────────────────────────────────────────
 // 100 requests per 15 minutes per IP (applies to all routes)
@@ -74,20 +79,12 @@ app.get("/health", (_, res) =>
 app.use("/api", apiRoutes);
 
 // Catch-all for undefined API routes to ensure JSON instead of HTML
-app.use("/api/*", (req, res) => {
+app.use("/api", (req, res) => {
   res.status(404).json({ success: false, error: "API route not found" });
 });
 
 // ── Global error handler ───────────────────────────────────────────────────────
-// eslint-disable-next-line no-unused-vars
-app.use((err, req, res, _next) => {
-  // CORS errors surface here
-  if (err.message?.startsWith("CORS:")) {
-    return res.status(403).json({ success: false, error: err.message });
-  }
-  console.error("[Server Error]", err);
-  res.status(500).json({ success: false, error: "Internal server error" });
-});
+app.use(errorHandler);
 
 // ── Static frontend (optional — only when dist/ exists, e.g. on Render) ───────
 const frontendDist = path.resolve(__dirname, "../frontend/dist");

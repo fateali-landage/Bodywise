@@ -34,7 +34,7 @@ export default function AICoachPage() {
         skin: result?.skin,
       };
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/ai-chat`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/ai/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -48,7 +48,7 @@ export default function AICoachPage() {
         throw new Error(data.error || "Failed to fetch response");
       }
 
-      setMessages(prev => [...prev, { role: "ai", text: data.response }]);
+      setMessages(prev => [...prev, { role: "ai", text: data.reply }]);
     } catch (err) {
       console.error(err);
       setError(err.message || "An error occurred.");

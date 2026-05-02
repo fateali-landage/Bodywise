@@ -37,15 +37,23 @@ export const requireAuth = async (req, res, next) => {
     });
   }
 
-  const { data, error } = await supabaseAuthClient.auth.getUser(token);
+  try {
+    const { data, error } = await supabaseAuthClient.auth.getUser(token);
 
-  if (error || !data?.user) {
-    return res.status(401).json({
+    if (error || !data?.user) {
+      return res.status(401).json({
+        success: false,
+        error: "Unauthorized: invalid or expired token",
+      });
+    }
+
+    req.user = data.user;
+    next();
+  } catch (err) {
+    console.error("[Auth Middleware Error]", err);
+    return res.status(500).json({
       success: false,
-      error: "Unauthorized: invalid or expired token",
+      error: "Internal server error during authentication",
     });
   }
-
-  req.user = data.user;
-  next();
 };
