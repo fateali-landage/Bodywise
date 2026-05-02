@@ -8,6 +8,7 @@ import {
 } from "../controllers/analyzeController.js";
 import { createHabit, listHabits } from "../controllers/habitController.js";
 import { getAiInsights } from "../controllers/aiInsightsController.js";
+import { getDailyFoodLog, addFoodLog, deleteFoodLog } from "../controllers/foodLogController.js";
 import { requireAuth } from "../middleware/authMiddleware.js";
 
 const router = Router();
@@ -21,5 +22,8 @@ router.post("/lifestyle",     requireAuth, analyzeLifestyle);
 router.post("/ai-insights",   requireAuth, getAiInsights);
 router.get("/habits",         requireAuth, listHabits);
 router.post("/habits",        requireAuth, createHabit);
+router.get("/food-logs",      requireAuth, getDailyFoodLog);
+router.post("/food-logs",     requireAuth, addFoodLog);
+router.delete("/food-logs/:id", requireAuth, deleteFoodLog);
 
 export default router;

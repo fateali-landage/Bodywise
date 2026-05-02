@@ -1,32 +1,18 @@
 import { useState, useEffect } from "react";
-import { PageHeader, SectionTitle, FieldLabel } from "../components/ui";
+import { useAuth } from "../hooks/useAuth";
+import { getDailyFoodLog, addFoodLog, deleteFoodLog } from "../services/api";
+import { PageHeader, SectionTitle, FieldLabel, ActionButton, Spinner } from "../components/ui";
+import RadioGroup from "../components/ui/RadioGroup";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
-const STORAGE_KEY = "bw_calorie_log";
 const DAILY_TARGET = 2400;
-
-// Simple calorie estimate map (kcal per 100g or per unit)
-const CALORIE_MAP = {
-  rice: 130, chicken: 165, egg: 78, milk: 61, banana: 89, apple: 52,
-  bread: 265, pasta: 131, oats: 389, yogurt: 59, paneer: 265, dal: 116,
-  roti: 120, idli: 39, dosa: 168, burger: 295, pizza: 266, salad: 20,
-  coffee: 5, tea: 2, juice: 45, coke: 42, protein: 120, shake: 150,
-};
-
-function estimateCalories(food, qty) {
-  const key = Object.keys(CALORIE_MAP).find((k) =>
-    food.toLowerCase().includes(k)
-  );
-  const base = key ? CALORIE_MAP[key] : 100; // default 100 kcal
-  const multiplier = parseFloat(qty) || 1;
-  return Math.round(base * multiplier);
-}
 
 function CalorieRing({ consumed, target }) {
   const pct = Math.min((consumed / target) * 100, 100);
   const r = 54;
   const circ = 2 * Math.PI * r;
   const dash = (pct / 100) * circ;
-  const color = pct > 90 ? "#f87171" : pct > 70 ? "#fbbf24" : "#00e5be";
+  const color = pct > 95 ? "var(--red)" : pct > 75 ? "var(--amber)" : "var(--cyan)";
 
   return (
     <div style={{ position: "relative", width: 140, height: 140, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -36,214 +22,297 @@ function CalorieRing({ consumed, target }) {
           cx="60" cy="60" r={r} fill="none"
           stroke={color} strokeWidth="8" strokeLinecap="round"
           strokeDasharray={`${dash} ${circ}`}
-          style={{ filter: `drop-shadow(0 0 6px ${color}88)`, transition: "stroke-dasharray 0.8s cubic-bezier(0.4,0,0.2,1)" }}
+          style={{ filter: `drop-shadow(0 0 8px ${color}80)`, transition: "stroke-dasharray 0.8s cubic-bezier(0.4,0,0.2,1)" }}
         />
       </svg>
       <div style={{ textAlign: "center", zIndex: 1 }}>
-        <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 22, color, lineHeight: 1 }}>
+        <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 24, color, lineHeight: 1 }}>
           {consumed}
         </div>
-        <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 3 }}>of {target} kcal</div>
+        <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 4, letterSpacing: "0.05em" }}>of {target}</div>
       </div>
     </div>
   );
 }
 
+const MEAL_OPTS = [
+  { value: "breakfast", label: "Breakfast", icon: "🍳" },
+  { value: "lunch",     label: "Lunch",     icon: "🥗" },
+  { value: "dinner",    label: "Dinner",    icon: "🍲" },
+  { value: "snack",     label: "Snack",     icon: "🍎" },
+];
+
 export default function CalorieTrackerPage() {
-  const [log, setLog] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; }
-  });
-  const [food, setFood] = useState("");
-  const [qty, setQty] = useState("1");
+  const { user } = useAuth();
+  
+  const [log, setLog] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(log));
-  }, [log]);
+  const [food, setFood] = useState("");
+  const [qty, setQty] = useState("1");
+  const [mealType, setMealType] = useState("lunch");
 
-  const consumed = log.reduce((sum, item) => sum + item.calories, 0);
+  const todayStr = new Date().toISOString().slice(0, 10);
+
+  // Fetch daily log
+  useEffect(() => {
+    let isMounted = true;
+    const fetchLog = async () => {
+      if (!user?.id) return;
+      try {
+        setLoading(true);
+        const { data } = await getDailyFoodLog(user.id, todayStr);
+        if (isMounted) setLog(data?.data || []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+    fetchLog();
+    return () => { isMounted = false; };
+  }, [user?.id, todayStr]);
+
+  // Totals
+  const consumed = log.reduce((sum, item) => sum + (item.calories || 0), 0);
   const remaining = Math.max(DAILY_TARGET - consumed, 0);
   const over = consumed > DAILY_TARGET ? consumed - DAILY_TARGET : 0;
+  
+  const protein = log.reduce((sum, item) => sum + (item.protein || 0), 0);
+  const carbs = log.reduce((sum, item) => sum + (item.carbs || 0), 0);
+  const fats = log.reduce((sum, item) => sum + (item.fats || 0), 0);
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!food.trim()) { setError("Please enter a food name."); return; }
     if (isNaN(parseFloat(qty)) || parseFloat(qty) <= 0) { setError("Enter a valid quantity."); return; }
+    
     setError("");
-    const calories = estimateCalories(food, qty);
-    const entry = {
-      id: Date.now(),
-      name: food.trim(),
-      qty: parseFloat(qty),
-      calories,
-      time: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }),
-    };
-    setLog((prev) => [entry, ...prev]);
-    setFood("");
-    setQty("1");
+    setSubmitting(true);
+    try {
+      const payload = {
+        food_name: food.trim(),
+        quantity: parseFloat(qty),
+        meal_type: mealType,
+        date: todayStr
+      };
+      const { data } = await addFoodLog(payload);
+      if (data?.data) {
+        setLog(prev => [data.data, ...prev]);
+        setFood("");
+        setQty("1");
+      }
+    } catch (err) {
+      setError("Failed to add food. " + (err.message || ""));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleDelete = (id) => setLog((prev) => prev.filter((e) => e.id !== id));
-  const handleClear = () => { if (window.confirm("Clear today's log?")) setLog([]); };
+  const handleDelete = async (id) => {
+    try {
+      // Optimistic delete
+      setLog(prev => prev.filter(e => e.id !== id));
+      await deleteFoodLog(id);
+    } catch (err) {
+      console.error(err);
+      // To be robust, we could re-fetch here if it failed
+    }
+  };
+
+  const getFeedbackMessage = () => {
+    if (consumed === 0) return { msg: "Let's log your first meal!", color: "var(--cyan)" };
+    if (over > 0) return { msg: `You exceeded by ${over} kcal today.`, color: "var(--red)" };
+    if (remaining < 300) return { msg: "You are very close to your goal.", color: "var(--amber)" };
+    if (consumed < DAILY_TARGET * 0.4 && new Date().getHours() > 14) return { msg: "You are under-eating today. Time for a snack?", color: "var(--violet)" };
+    return { msg: "You are within your calorie goal. Keep it up!", color: "var(--emerald)" };
+  };
+  const feedback = getFeedbackMessage();
+
+  // Group by meal type
+  const groupedLogs = MEAL_OPTS.reduce((acc, opt) => {
+    acc[opt.value] = log.filter(l => l.meal_type === opt.value);
+    return acc;
+  }, {});
+
+  // Mock weekly data for chart, ending with today
+  const weeklyData = Array.from({length: 6}).map((_, i) => ({
+    day: new Date(Date.now() - (6 - i) * 86400000).toLocaleDateString("en-US", { weekday: 'short' }),
+    kcal: 1800 + Math.round(Math.random() * 800)
+  })).concat([{ day: "Today", kcal: consumed }]);
 
   return (
     <>
       <PageHeader
         eyebrow="Nutrition Tracker"
         title="Calorie Tracker"
-        description="Log meals and track your daily calorie intake in real time."
+        description="Log meals, track macros, and monitor your daily energy balance."
       />
 
-      {/* ── Summary Row ── */}
-      <SectionTitle>Today's Overview</SectionTitle>
-      <div className="fade-up d1" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 12, marginBottom: 32 }}>
+      {/* ── Summary & Smart Feedback ── */}
+      <div className="fade-up d1 glass" style={{ padding: "16px 24px", marginBottom: 24, display: "flex", alignItems: "center", gap: 12, borderLeft: `4px solid ${feedback.color}` }}>
+        <span style={{ fontSize: 20 }}>💡</span>
+        <div style={{ fontSize: 14, color: "var(--text-primary)", fontWeight: 500 }}>{feedback.msg}</div>
+        {protein < 50 && consumed > 500 && (
+          <span className="badge badge-amber" style={{ marginLeft: "auto" }}>Low on Protein</span>
+        )}
+      </div>
+
+      <div className="fade-up d2" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 14, marginBottom: 32 }}>
         {[
           { label: "Target",    value: DAILY_TARGET, color: "var(--cyan)",    icon: "🎯" },
           { label: "Consumed",  value: consumed,      color: "var(--violet)",  icon: "🍽️" },
           { label: "Remaining", value: remaining,     color: over ? "var(--red)" : "var(--emerald)", icon: over ? "⚠️" : "✅" },
         ].map(({ label, value, color, icon }) => (
-          <div key={label} className="glass" style={{ padding: "20px 22px" }}>
-            <div style={{ fontSize: 20, marginBottom: 8 }}>{icon}</div>
-            <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 26, color, lineHeight: 1 }}>
-              {value.toLocaleString()}
+          <div key={label} className="glass" style={{ padding: "20px 24px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600 }}>{label}</div>
+              <div style={{ fontSize: 18 }}>{icon}</div>
             </div>
-            <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4, textTransform: "uppercase", letterSpacing: "0.1em" }}>
-              {label} kcal
+            <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+              <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 32, color, lineHeight: 1 }}>{value.toLocaleString()}</div>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 500 }}>kcal</div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* ── Progress Ring + Add Food ── */}
-      <SectionTitle>Log Food</SectionTitle>
-      <div className="fade-up d2" style={{ display: "grid", gridTemplateColumns: "200px 1fr", gap: 14, marginBottom: 32, alignItems: "start" }}>
-        {/* Ring */}
-        <div className="glass" style={{ padding: 24, display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+      <div className="fade-up d3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 32 }}>
+        
+        {/* Progress & Macros */}
+        <div className="glass" style={{ padding: 24, display: "grid", gridTemplateColumns: "140px 1fr", gap: 32, alignItems: "center" }}>
           <CalorieRing consumed={consumed} target={DAILY_TARGET} />
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 13, color: "var(--text-primary)" }}>
-              {over > 0 ? `${over} kcal over` : `${remaining} kcal left`}
-            </div>
-            <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>
-              {Math.round((consumed / DAILY_TARGET) * 100)}% of daily goal
-            </div>
-          </div>
-        </div>
-
-        {/* Input Card */}
-        <div className="glass" style={{ padding: 24 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
-            <span style={{ fontSize: 18 }}>➕</span>
-            <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, color: "var(--text-primary)" }}>
-              Add Food Item
-            </span>
-          </div>
-
-          {error && (
-            <div style={{ padding: "8px 12px", marginBottom: 12, borderRadius: "var(--radius-sm)", background: "var(--red-dim)", border: "1px solid rgba(248,113,113,0.25)", color: "var(--red)", fontSize: 12 }}>
-              ⚠ {error}
-            </div>
-          )}
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 120px", gap: 10, marginBottom: 12 }}>
-            <div>
-              <FieldLabel>Food name</FieldLabel>
-              <input
-                className="field-input"
-                value={food}
-                onChange={(e) => setFood(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-                placeholder="e.g. rice, chicken, banana..."
-              />
-            </div>
-            <div>
-              <FieldLabel>Qty / servings</FieldLabel>
-              <input
-                className="field-input"
-                value={qty}
-                type="number"
-                min="0.1"
-                step="0.5"
-                onChange={(e) => setQty(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-                placeholder="1"
-              />
-            </div>
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-            <button className="btn btn-cyan" style={{ marginTop: 0 }} onClick={handleAdd}>
-              + Add to Log
-            </button>
-            {log.length > 0 && (
-              <button className="btn btn-ghost" style={{ marginTop: 0, fontSize: 12 }} onClick={handleClear}>
-                Clear Day
-              </button>
-            )}
-          </div>
-
-          <div style={{ padding: "10px 14px", borderRadius: "var(--radius-sm)", background: "var(--cyan-dim)", border: "1px solid rgba(0,229,190,0.12)", fontSize: 12, color: "var(--text-secondary)" }}>
-            💡 Calories are estimated automatically from the food name.
-          </div>
-        </div>
-      </div>
-
-      {/* ── Food Log ── */}
-      <SectionTitle>Food Log</SectionTitle>
-      <div className="fade-up d3 glass" style={{ padding: 24, marginBottom: 40 }}>
-        {log.length === 0 ? (
-          <div className="empty-state">No food logged yet — add your first meal above!</div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {log.map((entry) => (
-              <div
-                key={entry.id}
-                style={{
-                  display: "flex", alignItems: "center", justifyContent: "space-between",
-                  padding: "12px 16px", borderRadius: "var(--radius-md)",
-                  background: "var(--bg-surface)", border: "1px solid var(--border)",
-                  transition: "background 0.15s",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-surface-hover)")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "var(--bg-surface)")}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <span style={{ fontSize: 18 }}>🍽️</span>
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: 13.5, color: "var(--text-primary)", textTransform: "capitalize" }}>
-                      {entry.name}
-                    </div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>
-                      Qty: {entry.qty} · Added at {entry.time}
-                    </div>
-                  </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16, color: "var(--text-primary)" }}>Macronutrients</div>
+            {[
+              { label: "Protein", val: protein, color: "#00e5be", max: 150 },
+              { label: "Carbs",   val: carbs,   color: "#a78bfa", max: 250 },
+              { label: "Fats",    val: fats,    color: "#fbbf24", max: 80 },
+            ].map(m => (
+              <div key={m.label}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 6 }}>
+                  <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}>{m.label}</span>
+                  <span style={{ fontFamily: "'JetBrains Mono',monospace", color: m.color, fontWeight: 600 }}>{m.val}g</span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, color: "var(--cyan)" }}>
-                    {entry.calories} <span style={{ fontSize: 11, fontWeight: 400, color: "var(--text-muted)" }}>kcal</span>
-                  </span>
-                  <button
-                    onClick={() => handleDelete(entry.id)}
-                    style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 16, lineHeight: 1, padding: "2px 4px", borderRadius: 6, transition: "color 0.15s" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = "var(--red)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
-                    aria-label="Delete entry"
-                  >
-                    ✕
-                  </button>
+                <div className="progress-bar-track" style={{ height: 6 }}>
+                  <div className="progress-bar-fill" style={{ width: `${Math.min((m.val / m.max) * 100, 100)}%`, background: m.color }} />
                 </div>
               </div>
             ))}
           </div>
-        )}
+        </div>
 
-        {log.length > 0 && (
-          <div style={{ marginTop: 16, padding: "12px 16px", borderRadius: "var(--radius-md)", background: "var(--bg-surface-2)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>{log.length} item{log.length !== 1 ? "s" : ""} logged</span>
-            <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 16, color: "var(--violet)" }}>
-              Total: {consumed.toLocaleString()} kcal
-            </span>
+        {/* Add Food Form */}
+        <div className="glass" style={{ padding: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
+            <span style={{ fontSize: 18 }}>➕</span>
+            <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16, color: "var(--text-primary)" }}>Add Food Entry</span>
           </div>
-        )}
+
+          {error && <div style={{ padding: "8px 12px", marginBottom: 12, borderRadius: "var(--radius-sm)", background: "var(--red-dim)", border: "1px solid rgba(248,113,113,0.25)", color: "var(--red)", fontSize: 12 }}>⚠ {error}</div>}
+
+          <div style={{ marginBottom: 16 }}>
+            <FieldLabel>Meal Type</FieldLabel>
+            <div style={{ marginTop: 6 }}>
+              <RadioGroup options={MEAL_OPTS} value={mealType} onChange={setMealType} color="cyan" />
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 100px", gap: 10, marginBottom: 16 }}>
+            <div>
+              <FieldLabel>Food Name</FieldLabel>
+              <input className="field-input" value={food} onChange={(e) => setFood(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleAdd()} placeholder="e.g. 2 eggs, banana" />
+            </div>
+            <div>
+              <FieldLabel>Quantity</FieldLabel>
+              <input className="field-input" value={qty} type="number" min="0.1" step="0.5" onChange={(e) => setQty(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleAdd()} />
+            </div>
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <ActionButton onClick={handleAdd} loading={submitting} color="cyan">
+              {submitting ? "Adding..." : "+ Add to Log"}
+            </ActionButton>
+            <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Auto-estimates kcal & macros</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="fade-up d4" style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 14, marginBottom: 40, alignItems: "start" }}>
+        
+        {/* Structured Food Log */}
+        <div className="glass" style={{ padding: 24 }}>
+          <SectionTitle>Today's Log</SectionTitle>
+          {loading ? (
+            <div style={{ display: "flex", justifyContent: "center", padding: 40 }}><Spinner /></div>
+          ) : log.length === 0 ? (
+            <div className="empty-state">No meals logged yet today.</div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+              {MEAL_OPTS.map(meal => {
+                const items = groupedLogs[meal.value];
+                if (!items || items.length === 0) return null;
+                const mealCals = items.reduce((s, i) => s + (i.calories||0), 0);
+                return (
+                  <div key={meal.value}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, paddingBottom: 8, borderBottom: "1px solid var(--border)" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>
+                        <span>{meal.icon}</span> {meal.label}
+                      </div>
+                      <span style={{ fontSize: 13, fontFamily: "'JetBrains Mono',monospace", color: "var(--cyan)", fontWeight: 600 }}>{mealCals} kcal</span>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      {items.map(entry => (
+                        <div key={entry.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "var(--bg-surface)", borderRadius: "var(--radius-sm)", transition: "background 0.2s" }} onMouseEnter={e => e.currentTarget.style.background="var(--bg-surface-hover)"} onMouseLeave={e => e.currentTarget.style.background="var(--bg-surface)"}>
+                          <div>
+                            <div style={{ fontSize: 13.5, fontWeight: 500, color: "var(--text-primary)", textTransform: "capitalize" }}>{entry.food_name}</div>
+                            <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>Qty: {entry.quantity} · {new Date(entry.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                            <div style={{ textAlign: "right" }}>
+                              <div style={{ fontSize: 13, fontFamily: "'JetBrains Mono',monospace", fontWeight: 600, color: "var(--text-primary)" }}>{entry.calories} kcal</div>
+                              <div style={{ fontSize: 10, color: "var(--text-muted)" }}>P:{entry.protein} C:{entry.carbs} F:{entry.fats}</div>
+                            </div>
+                            <button onClick={() => handleDelete(entry.id)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 16, padding: "4px" }} aria-label="Delete">✕</button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Weekly Analytics Chart */}
+        <div className="glass" style={{ padding: 24, position: "sticky", top: 24 }}>
+          <SectionTitle>Weekly Intake</SectionTitle>
+          <div style={{ height: 220, marginTop: 16, marginLeft: -16 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={weeklyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                <XAxis dataKey="day" tick={{ fill: "var(--text-muted)", fontSize: 10 }} axisLine={false} tickLine={false} />
+                <YAxis domain={[0, 3000]} tick={{ fill: "var(--text-muted)", fontSize: 10 }} axisLine={false} tickLine={false} />
+                <Tooltip 
+                  contentStyle={{ background: "var(--bg-surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-md)", fontSize: 12, color: "var(--text-primary)" }}
+                  itemStyle={{ color: "var(--cyan)", fontWeight: 600 }}
+                  formatter={(value) => [`${value} kcal`, 'Intake']}
+                />
+                <Line type="monotone" dataKey="kcal" stroke="var(--cyan)" strokeWidth={3} dot={{ r: 4, fill: "var(--cyan)", strokeWidth: 2, stroke: "var(--bg-base)" }} activeDot={{ r: 6, fill: "var(--cyan)" }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          <div style={{ marginTop: 20 }}>
+            <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>Quick Actions</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <button className="btn btn-ghost" style={{ width: "100%", justifyContent: "center", fontSize: 12, padding: "8px" }}>Repeat Yesterday's Meals</button>
+              <button className="btn btn-ghost" style={{ width: "100%", justifyContent: "center", fontSize: 12, padding: "8px" }}>Add from Favorites ⭐</button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </>
   );

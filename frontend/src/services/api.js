@@ -61,4 +61,8 @@ export const analyzeLifestyle = (payload) => api.post("/api/lifestyle", payload)
 export const listHabits       = (userId)  => api.get(`/api/habits?userId=${userId}`);
 export const createHabit      = (payload) => api.post("/api/habits", payload);
 
+export const getDailyFoodLog  = (userId, date) => api.get(`/api/food-logs?userId=${userId}&date=${date}`);
+export const addFoodLog       = (payload) => api.post("/api/food-logs", payload);
+export const deleteFoodLog    = (id)      => api.delete(`/api/food-logs/${id}`);
+
 export default api;
