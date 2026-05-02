@@ -67,4 +67,7 @@ export const deleteFoodLog    = (id)      => api.delete(`/api/food-logs/${id}`);
 
 export const getHistory       = ()        => api.get("/api/history");
 
+export const aiChat = (message) =>
+  api.post("/api/ai/chat", { message });
+
 export default api;

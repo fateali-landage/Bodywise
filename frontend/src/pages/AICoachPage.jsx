@@ -1,10 +1,11 @@
+import { aiChat } from "../services/api";
 import { useState, useRef, useEffect } from "react";
 import { PageHeader, ErrorBanner, ActionButton } from "../components/ui";
 import { useAuth } from "../hooks/useAuth";
 import { useBodyWise } from "../context/BodyWiseContext";
 
 export default function AICoachPage() {
-  const { session } = useAuth();
+
   const { result } = useBodyWise();
   const [messages, setMessages] = useState([
     { role: "ai", text: "Hello! I am BodyWise AI, your personal health coach. How can I help you today?" }
@@ -18,44 +19,54 @@ export default function AICoachPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!input.trim() || loading) return;
+const handleSend = async () => {
+  if (!input.trim() || loading) return;
 
-    const userMessage = input.trim();
-    setMessages(prev => [...prev, { role: "user", text: userMessage }]);
-    setInput("");
-    setLoading(true);
-    setError(null);
+const userMessage = input.trim();
+  setMessages(prev => [
+    ...prev,
+    { role: "user", text: userMessage }
+  ]);
 
-    try {
-      const contextPayload = {
-        body: result?.body,
-        lifestyle: result?.lifestyle,
-        skin: result?.skin,
-      };
+  setInput("");
+  setLoading(true);
+  setError(null);
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/ai/chat`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.access_token}`,
-        },
-        body: JSON.stringify({ message: userMessage, context: contextPayload }),
-      });
-
-      const data = await response.json();
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || "Failed to fetch response");
-      }
-
-      setMessages(prev => [...prev, { role: "ai", text: data.reply }]);
-    } catch (err) {
-      console.error(err);
-      setError(err.message || "An error occurred.");
-    } finally {
-      setLoading(false);
-    }
+  try {
+  const contextPayload = {
+    body: result?.body,
+    lifestyle: result?.lifestyle,
+    skin: result?.skin,
   };
+
+  const res = await aiChat({
+    message: userMessage,
+    context: contextPayload,
+  });
+
+  const reply =
+    typeof res?.data?.reply === "string" && res.data.reply.trim()
+      ? res.data.reply
+      : "AI is unavailable right now.";
+
+  setMessages(prev => [
+    ...prev,
+    { role: "ai", text: reply },
+  ]);
+
+} catch (err) {
+  console.error(err);
+
+  setMessages(prev => [
+    ...prev,
+    { role: "ai", text: "⚠️ AI is busy. Try again in a moment." },
+  ]);
+
+  setError(err.message || "Something went wrong.");
+} finally {
+  setLoading(false); // ✅ THIS WAS MISSING
+}
+};
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -105,9 +116,13 @@ export default function AICoachPage() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
           />
-          <ActionButton onClick={handleSend} disabled={!input.trim() || loading} className="m-0">
-            Send
-          </ActionButton>
+          <ActionButton
+  onClick={handleSend}
+  disabled={!input.trim() || loading}
+  className="m-0 opacity-100 disabled:opacity-50"
+>
+  {loading ? "..." : "Send"}
+</ActionButton>
         </div>
       </div>
     </div>
