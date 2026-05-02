@@ -6,9 +6,15 @@
 import axios from "axios";
 import { supabase } from "./supabaseClient";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
+if (!API_URL) {
+  throw new Error("❌ VITE_API_URL is missing. Check your .env file");
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "",
-  timeout: 20000, // 20-second timeout — prevents indefinite hangs on AI endpoints
+  baseURL: API_URL,
+  timeout: 20000,
 });
 
 // ── Request interceptor — attach Bearer token ─────────────────────────────────
