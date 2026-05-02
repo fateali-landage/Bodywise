@@ -110,11 +110,12 @@ export function BodyWiseProvider({ user, children }) {
   }, [food, setResult]);
 
   // ── Run lifestyle analysis ───────────────────────────────────────────────
-  const runLifestyle = useCallback(async () => {
+  const runLifestyle = useCallback(async (payload = null) => {
     setLoadingFor("lifestyle", true);
     setError(null);
     try {
-      const { data } = await analyzeLifestyle(lifestyle);
+      const dataToSend = payload ? { ...lifestyle, ...payload } : lifestyle;
+      const { data } = await analyzeLifestyle(dataToSend);
       setResult((prev) => ({ ...prev, lifestyle: data.data }));
     } catch (err) {
       setError(err?.message || "Lifestyle analysis failed. Please try again.");

@@ -1,11 +1,12 @@
 import { NavLink } from "react-router-dom";
 
 const NAV_ITEMS = [
-  { to: "/", label: "Dashboard", icon: "🏠", end: true },
-  { to: "/analyze", label: "Analyze", icon: "🫀" },
-  { to: "/results", label: "Results", icon: "📊" },
-  { to: "/diet", label: "Diet & Calories", icon: "🥗" },
-  { to: "/profile", label: "Profile", icon: "👤" },
+  { to: "/",         label: "Dashboard",      icon: "🏠", end: true },
+  { to: "/analyze",  label: "Analyze",        icon: "🫀" },
+  { to: "/results",  label: "Results",        icon: "📊" },
+  { to: "/diet",     label: "Diet Plan",      icon: "🥗" },
+  { to: "/calories", label: "Calorie Tracker",icon: "🔥" },
+  { to: "/profile",  label: "Profile",        icon: "👤" },
 ];
 
 export default function Sidebar({ user, onSignOut, open, onNavigate }) {

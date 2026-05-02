@@ -4,8 +4,9 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "./hooks/useAuth";
 import AnalyzePage from "./pages/AnalyzePage";
 import AuthPage from "./pages/AuthPage";
+import CalorieTrackerPage from "./pages/CalorieTrackerPage";
 import DashboardPage from "./pages/DashboardPage";
-import DietPage from "./pages/DietPage";
+import DietPlanPage from "./pages/DietPlanPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import ProfilePage from "./pages/ProfilePage";
 import ResultsPage from "./pages/ResultsPage";
@@ -26,17 +27,15 @@ export default function App() {
           </ProtectedRoute>
         }
       >
-        <Route path="/"        element={<DashboardPage />} />
-        <Route path="/analyze" element={<AnalyzePage />} />
-        <Route path="/results" element={<ResultsPage />} />
-        <Route path="/diet"    element={<DietPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-
-        {/* BUG-020 FIX: show proper 404 instead of silent redirect */}
-        <Route path="*" element={<NotFoundPage />} />
+        <Route path="/"         element={<DashboardPage />} />
+        <Route path="/analyze"  element={<AnalyzePage />} />
+        <Route path="/results"  element={<ResultsPage />} />
+        <Route path="/diet"     element={<DietPlanPage />} />
+        <Route path="/calories" element={<CalorieTrackerPage />} />
+        <Route path="/profile"  element={<ProfilePage />} />
+        <Route path="*"         element={<NotFoundPage />} />
       </Route>
 
-      {/* Unauthenticated users hitting an unknown root route */}
       <Route path="*" element={<Navigate to="/auth" replace />} />
     </Routes>
   );
