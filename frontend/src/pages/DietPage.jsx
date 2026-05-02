@@ -103,6 +103,34 @@ export default function DietPage() {
             </div>
           ))}
         </div>
+        
+        <div className="mt-4 pt-4 border-t border-[var(--border)]">
+          <FieldLabel>Add Custom Habit</FieldLabel>
+          <div className="flex gap-2 mt-1.5">
+            <input 
+              className="field-input flex-1" 
+              placeholder="e.g. Read 10 pages" 
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && e.target.value.trim()) {
+                  setHabitItems(prev => ({ ...prev, [e.target.value.trim()]: false }));
+                  e.target.value = "";
+                }
+              }}
+            />
+            <button 
+              className="btn btn-ghost"
+              onClick={(e) => {
+                const input = e.currentTarget.previousSibling;
+                if (input.value.trim()) {
+                  setHabitItems(prev => ({ ...prev, [input.value.trim()]: false }));
+                  input.value = "";
+                }
+              }}
+            >
+              Add
+            </button>
+          </div>
+        </div>
         <div className="mt-4">
           <ActionButton onClick={saveHabit} loading={loading.habit} color="emerald" className="w-full sm:w-auto">
             {loading.habit ? "Saving…" : "Save Today's Habits"}

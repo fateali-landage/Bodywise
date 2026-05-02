@@ -43,7 +43,13 @@ export const listHabits = async (req, res) => {
       return res.status(400).json({ success: false, error: error.message });
     }
 
-    return res.json({ success: true, data });
+    // Merge custom_habits back to top level for frontend
+    const mappedData = data.map((d) => {
+      const { custom_habits, ...rest } = d;
+      return { ...rest, ...(custom_habits || {}) };
+    });
+
+    return res.json({ success: true, data: mappedData });
   } catch (err) {
     console.error("[listHabits]", err);
     return res.status(500).json({ success: false, error: "Failed to load habits." });
@@ -63,6 +69,17 @@ export const createHabit = async (req, res) => {
       return res.status(400).json({ success: false, error: "user_id is required." });
     }
 
+    const { user_id, date, water, sleep, protein, ...rest } = payload;
+    
+    const dbPayload = {
+      user_id,
+      date: date || new Date().toISOString().slice(0, 10),
+      water: !!water,
+      sleep: !!sleep,
+      protein: !!protein,
+      custom_habits: rest, // Save all dynamically added custom habits as JSONB
+    };
+
     if (!supabaseAdmin) {
       return res.status(201).json({
         success: true,
@@ -73,7 +90,7 @@ export const createHabit = async (req, res) => {
 
     const { data, error } = await supabaseAdmin
       .from("habits")
-      .insert(payload)
+      .insert(dbPayload)
       .select()
       .single();
 

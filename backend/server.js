@@ -73,6 +73,11 @@ app.get("/health", (_, res) =>
 // ── API routes ─────────────────────────────────────────────────────────────────
 app.use("/api", apiRoutes);
 
+// Catch-all for undefined API routes to ensure JSON instead of HTML
+app.use("/api/*", (req, res) => {
+  res.status(404).json({ success: false, error: "API route not found" });
+});
+
 // ── Global error handler ───────────────────────────────────────────────────────
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, _next) => {

@@ -52,7 +52,10 @@ export default function CalorieTrackerPage() {
 
   const [food, setFood] = useState("");
   const [qty, setQty] = useState("1");
+  const [unit, setUnit] = useState("serving");
   const [mealType, setMealType] = useState("lunch");
+
+  const UNITS = ["g", "ml", "piece", "serving", "cup", "tbsp"];
 
   const todayStr = new Date().toISOString().slice(0, 10);
 
@@ -85,15 +88,32 @@ export default function CalorieTrackerPage() {
   const fats = log.reduce((sum, item) => sum + (item.fats || 0), 0);
 
   const handleAdd = async () => {
-    if (!food.trim()) { setError("Please enter a food name."); return; }
-    if (isNaN(parseFloat(qty)) || parseFloat(qty) <= 0) { setError("Enter a valid quantity."); return; }
+    let fName = food.trim();
+    let finalQty = parseFloat(qty);
+    let finalUnit = unit;
+
+    // Smart parsing: e.g. "2 eggs", "1 cup rice", "150 g chicken"
+    const match = fName.match(/^(\d+(?:\.\d+)?)\s*(g|ml|piece|pieces|serving|servings|cup|cups|tbsp)?\s+(.+)$/i);
+    if (match) {
+      finalQty = parseFloat(match[1]);
+      const rawUnit = (match[2] || "").toLowerCase();
+      if (rawUnit.startsWith("piece") || rawUnit === "") finalUnit = "piece";
+      else if (rawUnit.startsWith("serving")) finalUnit = "serving";
+      else if (rawUnit.startsWith("cup")) finalUnit = "cup";
+      else if (rawUnit === "g" || rawUnit === "ml" || rawUnit === "tbsp") finalUnit = rawUnit;
+      fName = match[3];
+    }
+
+    if (!fName) { setError("Please enter a food name."); return; }
+    if (isNaN(finalQty) || finalQty <= 0) { setError("Enter a valid quantity."); return; }
     
     setError("");
     setSubmitting(true);
     try {
       const payload = {
-        food_name: food.trim(),
-        quantity: parseFloat(qty),
+        food_name: fName,
+        quantity: finalQty,
+        unit: finalUnit,
         meal_type: mealType,
         date: todayStr
       };
@@ -219,14 +239,20 @@ export default function CalorieTrackerPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-[1fr_100px] gap-2.5 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-[1fr_120px_100px] gap-2.5 mb-4">
             <div>
               <FieldLabel>Food Name</FieldLabel>
-              <input className="field-input w-full" value={food} onChange={(e) => setFood(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleAdd()} placeholder="e.g. 2 eggs, banana" />
+              <input className="field-input w-full" value={food} onChange={(e) => setFood(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleAdd()} placeholder="e.g. 2 eggs, 1 cup rice" />
             </div>
             <div>
               <FieldLabel>Quantity</FieldLabel>
               <input className="field-input w-full" value={qty} type="number" min="0.1" step="0.5" onChange={(e) => setQty(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleAdd()} />
+            </div>
+            <div>
+              <FieldLabel>Unit</FieldLabel>
+              <select className="field-input w-full cursor-pointer" value={unit} onChange={(e) => setUnit(e.target.value)}>
+                {UNITS.map(u => <option key={u} value={u}>{u}</option>)}
+              </select>
             </div>
           </div>
 
@@ -267,7 +293,7 @@ export default function CalorieTrackerPage() {
                         <div key={entry.id} className="flex justify-between items-center p-2 sm:px-3 bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-hover)] rounded-[var(--radius-sm)] transition-colors">
                           <div>
                             <div className="text-[13.5px] font-medium text-[var(--text-primary)] capitalize">{entry.food_name}</div>
-                            <div className="text-[11px] text-[var(--text-muted)] mt-0.5">Qty: {entry.quantity} · {new Date(entry.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                            <div className="text-[11px] text-[var(--text-muted)] mt-0.5">Qty: {entry.quantity} {entry.unit || "serving"} · {new Date(entry.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
                           </div>
                           <div className="flex items-center gap-2 sm:gap-3">
                             <div className="text-right">

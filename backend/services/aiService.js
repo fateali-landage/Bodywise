@@ -32,7 +32,16 @@ ${JSON.stringify(data)}
 Give clear, short insight and recommendation.
 `;
 
-    const result = await model.generateContent(prompt);
+    // 10 second timeout
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("AI_TIMEOUT")), 10000)
+    );
+
+    const result = await Promise.race([
+      model.generateContent(prompt),
+      timeoutPromise
+    ]);
+
     const response = result?.response;
 
     let text =
@@ -75,7 +84,16 @@ User Message:
 ${message}
 `;
 
-    const result = await model.generateContent(prompt);
+    // 15 second timeout for chat
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("AI_TIMEOUT")), 15000)
+    );
+
+    const result = await Promise.race([
+      model.generateContent(prompt),
+      timeoutPromise
+    ]);
+
     const response = result?.response;
 
     let text =
@@ -86,6 +104,9 @@ ${message}
     return text || "I am unable to formulate a response right now. Please try again.";
   } catch (error) {
     console.error("🔥 Gemini chat error:", error?.message || error);
+    if (error?.message === "AI_TIMEOUT") {
+      return "I'm currently experiencing high traffic and couldn't respond in time. Please try again.";
+    }
     return "An error occurred while generating a response. Please check the server logs.";
   }
 };

@@ -58,6 +58,12 @@ export default function AnalyzePage() {
   const [habitError, setHabitError] = useState("");
 
   const handleRunBody = async () => {
+    const { weight, height, age, activity, sleep, gender, diet } = inputs;
+    if (!weight || !height || !age || !activity || !sleep || !gender || !diet) {
+      setError("Please fill in all body metrics before analyzing.");
+      return;
+    }
+    setError(null);
     await runAnalysis();
     navigate("/results");
   };

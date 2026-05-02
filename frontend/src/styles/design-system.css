@@ -565,7 +565,7 @@ html.light .result-box {
   }
   .sidebar-overlay.show { opacity: 1; pointer-events: auto; }
   .topbar { display: flex; }
-  .main-content { padding: 20px 16px 48px; }
+  .main-content { padding: 80px 16px 48px; }
 }
 
 /* page header */
