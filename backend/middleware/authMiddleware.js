@@ -23,10 +23,12 @@ const supabaseAuthClient =
 export const requireAuth = async (req, res, next) => {
   // If Supabase is not configured, skip auth in dev/local mode
   if (!supabaseAuthClient) {
-    req.user = { id: "dev-user", email: "dev@local" };
-    return next();
-  }
-
+  req.user = {
+    id: "00000000-0000-0000-0000-000000000000",
+    email: "dev@local",
+  };
+  return next();
+}
   const authHeader = req.headers.authorization || "";
   const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
 
