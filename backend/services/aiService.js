@@ -20,7 +20,7 @@ export const generateInsight = async (data, systemPrompt) => {
 
   try {
     const model = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash-latest",
+  model: "gemini-pro",
 });
 
     const prompt = `
@@ -76,9 +76,8 @@ export const generateChatResponse = async (message, context) => {
 
   try {
     const model = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash-latest",
+  model: "gemini-pro",
 });
-
     const prompt = `You are BodyWise AI, a personal health and wellness coach.
 You give professional, practical, and empathetic advice regarding fitness, diet, sleep, and overall wellness.
 Keep your responses concise and formatted cleanly with markdown.
