@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { env } from "../config/env.js";
 
-console.log("🚀 Gemini 2.0 Flash ACTIVE");
+console.log("🚀 Gemini ACTIVE");
 console.log("🔑 Gemini Key Exists:", !!env.geminiApiKey);
 
 const genAI = env.geminiApiKey
@@ -44,10 +44,16 @@ Give clear, short insight and recommendation.
 
     const response = result?.response;
 
-    let text =
-      response?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      (typeof response?.text === "function" ? response.text() : "") ||
-      "";
+    let text = "";
+
+if (typeof response?.text === "function") {
+  text = response.text();
+} else if (response?.candidates?.length) {
+  text =
+    response.candidates[0]?.content?.parts
+      ?.map((part) => part.text || "")
+      .join(" ") || "";
+}
 
     if (!text) {
       console.log("⚠️ Empty Gemini response");
@@ -95,11 +101,18 @@ ${message}
     ]);
 
     const response = result?.response;
+    console.log("Gemini raw response:", JSON.stringify(response, null, 2));
 
-    let text =
-      response?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      (typeof response?.text === "function" ? response.text() : "") ||
-      "";
+    let text = "";
+
+if (typeof response?.text === "function") {
+  text = response.text();
+} else if (response?.candidates?.length) {
+  text =
+    response.candidates[0]?.content?.parts
+      ?.map((part) => part.text || "")
+      .join(" ") || "";
+}
 
     return text || "I am unable to formulate a response right now. Please try again.";
   } catch (error) {
