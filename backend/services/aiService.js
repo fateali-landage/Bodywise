@@ -20,7 +20,7 @@ export const generateInsight = async (data, systemPrompt) => {
 
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
+      model: "gemini-1.5-flash",
     });
 
     const prompt = `
@@ -34,7 +34,7 @@ Give clear, short insight and recommendation.
 
     // 10 second timeout
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("AI_TIMEOUT")), 10000)
+      setTimeout(() => reject(new Error("AI_TIMEOUT")), 30000)
     );
 
     const result = await Promise.race([
@@ -70,7 +70,7 @@ export const generateChatResponse = async (message, context) => {
 
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
+      model: "gemini-1.5-flash",
     });
 
     const prompt = `You are BodyWise AI, a personal health and wellness coach.
