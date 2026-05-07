@@ -82,8 +82,10 @@ function estimateFood(foodName, quantity, unit) {
 // ── GET /api/food-logs ────────────────────────────────────────────────────────
 export const getDailyFoodLog = async (req, res) => {
   try {
-    const userId = req.query.userId || req.user?.id;
-    if (!userId) return res.status(400).json({ success: false, error: "userId is required." });
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, error: "Unauthorized: userId not found in token." });
+    }
 
     const date = req.query.date || new Date().toISOString().slice(0, 10);
 

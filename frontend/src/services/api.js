@@ -64,10 +64,10 @@ export const analyzeSkin      = (payload) => api.post("/api/analyze-skin", paylo
 export const predictHealth    = (payload) => api.post("/api/predict", payload);
 export const analyzeFood      = (payload) => api.post("/api/food", payload);
 export const analyzeLifestyle = (payload) => api.post("/api/lifestyle", payload);
-export const listHabits       = (userId)  => api.get(`/api/habits?userId=${userId}`);
+export const listHabits       = ()        => api.get("/api/habits");
 export const createHabit      = (payload) => api.post("/api/habits", payload);
 
-export const getDailyFoodLog  = (userId, date) => api.get(`/api/food-logs?userId=${userId}&date=${date}`);
+export const getDailyFoodLog  = (date)    => api.get(`/api/food-logs?date=${date}`);
 export const addFoodLog       = (payload) => api.post("/api/food-logs", payload);
 export const deleteFoodLog    = (id)      => api.delete(`/api/food-logs/${id}`);
 

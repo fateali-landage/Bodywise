@@ -24,11 +24,11 @@ export const listHabits = async (req, res) => {
       });
     }
 
-    // Prefer userId from query param; fall back to the verified JWT user
-    const userId = req.query.userId || req.user?.id;
+    // Strictly use the verified JWT user ID
+    const userId = req.user?.id;
 
     if (!userId) {
-      return res.status(400).json({ success: false, error: "userId is required." });
+      return res.status(401).json({ success: false, error: "Unauthorized: userId not found in token." });
     }
 
     const { data, error } = await supabaseAdmin
@@ -59,20 +59,16 @@ export const listHabits = async (req, res) => {
 // ── POST /api/habits ──────────────────────────────────────────────────────────
 export const createHabit = async (req, res) => {
   try {
-    const payload = req.body || {};
-
-    if (!payload.user_id && req.user?.id) {
-      payload.user_id = req.user.id;
+    // Always use the ID from the verified token
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, error: "Unauthorized." });
     }
 
-    if (!payload.user_id) {
-      return res.status(400).json({ success: false, error: "user_id is required." });
-    }
-
-    const { user_id, date, water, sleep, protein, ...rest } = payload;
+    const { date, water, sleep, protein, ...rest } = req.body || {};
     
     const dbPayload = {
-      user_id,
+      user_id: userId,
       date: date || new Date().toISOString().slice(0, 10),
       water: !!water,
       sleep: !!sleep,
@@ -90,7 +86,7 @@ export const createHabit = async (req, res) => {
 
     const { data, error } = await supabaseAdmin
       .from("habits")
-      .insert(dbPayload)
+      .upsert(dbPayload, { onConflict: "user_id, date" })
       .select()
       .single();
 

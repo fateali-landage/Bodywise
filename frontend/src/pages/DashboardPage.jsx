@@ -93,10 +93,37 @@ export default function DashboardPage() {
       {/* ── Top Stats Row ── */}
       <SectionTitle>Quick Stats</SectionTitle>
       <section className="fade-up d1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard icon="⚖️" label="BMI Index"    value={bmi}   sub={bmiStatus}               accent="#00e5be" trend={result.body ? 2 : undefined} />
-        <StatCard icon="🔥" label="Calories"     value="2,100" sub="Goal: 2,400 kcal"         accent="#f97316" />
-        <StatCard icon="💧" label="Water Intake" value="6"     sub="Goal: 8 glasses"          accent="#0ea5e9" trend={-5} />
-        <StatCard icon="🌙" label="Sleep"        value={inputs.sleep || "7"} sub="hrs last night" accent="#a78bfa" trend={8} />
+        <StatCard 
+          icon="⚖️" 
+          label="BMI Index"    
+          value={bmi}   
+          sub={bmiStatus}               
+          accent="#00e5be" 
+          trend={result.body ? 2 : undefined} 
+        />
+        <StatCard 
+          icon="🔥" 
+          label="Calories"     
+          value={result.body ? Math.round(1800 + (parseFloat(inputs.activity || 3) * 120)).toLocaleString() : "2,100"} 
+          sub={result.body ? "Calculated BMR" : "Goal: 2,400 kcal"}         
+          accent="#f97316" 
+        />
+        <StatCard 
+          icon="💧" 
+          label="Water Intake" 
+          value={habitItems?.water ? "8" : "6"}     
+          sub="Goal: 8 glasses"          
+          accent="#0ea5e9" 
+          trend={habitItems?.water ? 5 : -5} 
+        />
+        <StatCard 
+          icon="🌙" 
+          label="Sleep"        
+          value={inputs.sleep || "7"} 
+          sub="hrs last night" 
+          accent="#a78bfa" 
+          trend={parseFloat(inputs.sleep) >= 7 ? 8 : -10} 
+        />
       </section>
 
       {/* ── Health Scores ── */}

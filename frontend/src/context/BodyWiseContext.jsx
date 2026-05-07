@@ -131,11 +131,10 @@ export function BodyWiseProvider({ user, children }) {
     setError(null);
     try {
       await createHabit({
-        user_id: user.id,
         ...habitItems,
         date: new Date().toISOString().slice(0, 10),
       });
-      const { data } = await listHabits(user.id);
+      const { data } = await listHabits();
       setResult((prev) => ({ ...prev, habits: data.data }));
     } catch (err) {
       setError(err?.message || "Failed to save habit. Please try again.");
@@ -148,7 +147,7 @@ export function BodyWiseProvider({ user, children }) {
   const refreshHabits = useCallback(async () => {
     if (!user?.id) return;
     try {
-      const { data } = await listHabits(user.id);
+      const { data } = await listHabits();
       setResult((prev) => ({ ...prev, habits: data.data }));
     } catch {
       // Silently ignore — habits refreshing on mount is non-critical

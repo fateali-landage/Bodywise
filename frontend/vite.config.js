@@ -6,12 +6,9 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     host: "0.0.0.0",
-    port: 5000,
+    port: 3000,
     strictPort: true,
     allowedHosts: true,
-    hmr: {
-      clientPort: 443,
-    },
     proxy: {
       "/api": {
         target: "http://localhost:5000",
@@ -25,7 +22,7 @@ export default defineConfig({
   },
   preview: {
     host: "0.0.0.0",
-    port: 5000,
+    port: 3000,
     strictPort: true,
     allowedHosts: true,
   },
