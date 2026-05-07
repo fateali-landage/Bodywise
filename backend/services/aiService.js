@@ -20,8 +20,8 @@ export const generateInsight = async (data, systemPrompt) => {
 
   try {
     const model = genAI.getGenerativeModel({
-      model: env.geminiModel || "gemini-1.5-flash",
-    });
+  model: "gemini-1.5-flash-latest",
+});
 
     const prompt = `
 ${systemPrompt || "You are a concise, evidence-based wellness coach."}
@@ -76,8 +76,8 @@ export const generateChatResponse = async (message, context) => {
 
   try {
     const model = genAI.getGenerativeModel({
-      model: env.geminiModel || "gemini-1.5-flash",
-    });
+  model: "gemini-1.5-flash-latest",
+});
 
     const prompt = `You are BodyWise AI, a personal health and wellness coach.
 You give professional, practical, and empathetic advice regarding fitness, diet, sleep, and overall wellness.
@@ -101,7 +101,7 @@ ${message}
     ]);
 
     const response = result?.response;
-    console.log("Gemini raw response:", JSON.stringify(response, null, 2));
+    console.log("Gemini response received");
 
     let text = "";
 
