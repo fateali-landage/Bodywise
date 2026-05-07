@@ -85,8 +85,11 @@ app.get("/health", (_, res) =>
 app.use("/api", apiRoutes);
 
 // Catch-all for undefined API routes to ensure JSON instead of HTML
-app.all("/api/*", (req, res) => {
-  res.status(404).json({ success: false, error: `API route not found: ${req.method} ${req.url}` });
+app.use("/api", (req, res) => {
+  res.status(404).json({
+    success: false,
+    error: `API route not found: ${req.method} ${req.url}`,
+  });
 });
 
 // ── Global error handler ───────────────────────────────────────────────────────
