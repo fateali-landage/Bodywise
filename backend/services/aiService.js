@@ -20,7 +20,7 @@ export const generateInsight = async (data, systemPrompt) => {
 
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: env.geminiModel || "gemini-1.5-flash",
     });
 
     const prompt = `
@@ -32,9 +32,9 @@ ${JSON.stringify(data)}
 Give clear, short insight and recommendation.
 `;
 
-    // 10 second timeout
+    // 25 second timeout for insights
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("AI_TIMEOUT")), 30000)
+      setTimeout(() => reject(new Error("AI_TIMEOUT")), 25000)
     );
 
     const result = await Promise.race([
@@ -70,7 +70,7 @@ export const generateChatResponse = async (message, context) => {
 
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: env.geminiModel || "gemini-1.5-flash",
     });
 
     const prompt = `You are BodyWise AI, a personal health and wellness coach.
@@ -84,9 +84,9 @@ User Message:
 ${message}
 `;
 
-    // 15 second timeout for chat
+    // 25 second timeout for chat
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("AI_TIMEOUT")), 15000)
+      setTimeout(() => reject(new Error("AI_TIMEOUT")), 25000)
     );
 
     const result = await Promise.race([

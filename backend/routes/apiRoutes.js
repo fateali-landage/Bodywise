@@ -30,4 +30,13 @@ router.delete("/food-logs/:id", requireAuth, deleteFoodLog);
 router.post("/ai/chat",       requireAuth, handleAiChat);
 router.get("/history",        requireAuth, getHistory);
 
+// ── Debug/Test route ─────────────────────────────────────────────────────────
+router.get("/test", (req, res) => {
+  res.json({
+    success: true,
+    message: "API router working",
+    timestamp: new Date().toISOString()
+  });
+});
+
 export default router;

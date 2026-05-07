@@ -70,6 +70,12 @@ app.use("/api/food",          aiLimiter);
 app.use("/api/lifestyle",     aiLimiter);
 app.use("/api/ai-insights",   aiLimiter);
 
+// ── Request logging (Development/Debug) ───────────────────────────────────────
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
+
 // ── Health check (public, no auth needed) ─────────────────────────────────────
 app.get("/health", (_, res) =>
   res.json({ status: "ok", service: "bodywise-backend", timestamp: new Date().toISOString() }),
@@ -79,8 +85,8 @@ app.get("/health", (_, res) =>
 app.use("/api", apiRoutes);
 
 // Catch-all for undefined API routes to ensure JSON instead of HTML
-app.use("/api", (req, res) => {
-  res.status(404).json({ success: false, error: "API route not found" });
+app.all("/api/*", (req, res) => {
+  res.status(404).json({ success: false, error: `API route not found: ${req.method} ${req.url}` });
 });
 
 // ── Global error handler ───────────────────────────────────────────────────────

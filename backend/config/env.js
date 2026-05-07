@@ -32,7 +32,7 @@ export const env = {
   port: process.env.PORT || 5000,
   frontendUrl: process.env.FRONTEND_URL || "https://bodywise-two.vercel.app",
   geminiApiKey: GEMINI_KEY,
-  geminiModel: process.env.GEMINI_MODEL || "gemini-2.0-flash",
+  geminiModel: process.env.GEMINI_MODEL || "gemini-1.5-flash",
   supabaseUrl: SUPA_URL,
   supabaseServiceRoleKey: SUPA_KEY,
   supabaseAnonKey: process.env.SUPABASE_ANON_KEY || "",
