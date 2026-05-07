@@ -51,7 +51,7 @@ export default function ChartSection({ scores }) {
           </span>
           <span className="badge badge-violet ml-auto text-[10px]">7 Days</span>
         </div>
-        <div className="flex-1 w-full min-h-[200px]">
+        <div className="w-full h-[300px] min-w-0 mt-2">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={weeklyData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -74,12 +74,12 @@ export default function ChartSection({ scores }) {
             Macro Split
           </span>
         </div>
-        <div className="w-full h-[160px] flex-shrink-0">
+        <div className="w-full h-[200px] min-w-0 flex-shrink-0">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={macroData} cx="50%" cy="50%"
-                innerRadius={48} outerRadius={72}
+                innerRadius={60} outerRadius={85}
                 paddingAngle={3} dataKey="value"
               >
                 {macroData.map((entry) => (

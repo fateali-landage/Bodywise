@@ -66,7 +66,7 @@ export default function CalorieTrackerPage() {
       if (!user?.id) return;
       try {
         setLoading(true);
-        const { data } = await getDailyFoodLog(user.id, todayStr);
+        const { data } = await getDailyFoodLog(todayStr);
         if (isMounted) setLog(data?.data || []);
       } catch (err) {
         console.error(err);
@@ -315,7 +315,7 @@ export default function CalorieTrackerPage() {
         {/* Weekly Analytics Chart */}
         <div className="glass p-5 sm:p-6 lg:sticky lg:top-6">
           <SectionTitle>Weekly Intake</SectionTitle>
-          <div className="h-[220px] mt-4 -ml-4 w-full">
+          <div className="w-full h-[400px] min-w-0 mt-4">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={weeklyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />

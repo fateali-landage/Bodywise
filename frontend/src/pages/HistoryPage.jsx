@@ -58,7 +58,7 @@ export default function HistoryPage() {
           <div className="glass p-5 sm:p-6">
             <SectionTitle>BMI Progression</SectionTitle>
             {bmiData.length > 1 ? (
-              <div className="h-[260px] mt-4 w-full">
+              <div className="w-full h-[400px] min-w-0 mt-4">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={bmiData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
