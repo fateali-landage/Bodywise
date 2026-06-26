@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useBodyWise } from "../context/BodyWiseContext";
 import { supabase } from "../services/supabaseClient";
 import { ActionButton, PageHeader, SectionHeader, SectionTitle, FieldLabel } from "../components/ui";
