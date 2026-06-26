@@ -11,7 +11,8 @@ const MOCK_FOODS = {
   bread: { name: "Whole Wheat Bread", brand: "Standard USDA SR Legacy", calories: 247, protein: 13, carbs: 41, fat: 3.4, fiber: 6, servingSize: "100 g", fdcId: "172688" },
   oats: { name: "Rolled Oats (Dry)", brand: "Standard USDA SR Legacy", calories: 389, protein: 16.9, carbs: 66.3, fat: 6.9, fiber: 10.6, servingSize: "100 g", fdcId: "172428" },
   paneer: { name: "Paneer Cheese", brand: "Standard Dairy Reference", calories: 265, protein: 18.3, carbs: 1.2, fat: 20.8, fiber: 0, servingSize: "100 g", fdcId: "paneer-mock" },
-  tomato: { name: "Red Tomato (Raw)", brand: "Standard USDA SR Legacy", calories: 18, protein: 0.9, carbs: 3.9, fat: 0.2, fiber: 1.2, servingSize: "100 g", fdcId: "170010" }
+  tomato: { name: "Red Tomato (Raw)", brand: "Standard USDA SR Legacy", calories: 18, protein: 0.9, carbs: 3.9, fat: 0.2, fiber: 1.2, servingSize: "100 g", fdcId: "170010" },
+  cucumber: { name: "Cucumber (Raw)", brand: "Standard USDA SR Legacy", calories: 15, protein: 0.7, carbs: 3.6, fat: 0.1, fiber: 0.5, servingSize: "100 g", fdcId: "169225" }
 };
 
 /**

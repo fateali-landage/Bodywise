@@ -34,13 +34,117 @@ function CalorieRing({ consumed, target }) {
       </svg>
       <div className="text-center relative z-10">
         <div className="font-syne font-extrabold text-2xl leading-none" style={{ color }}>
-          {consumed}
+          {parseFloat(consumed).toFixed(1)}
         </div>
         <div className="text-[10px] text-[var(--text-muted)] mt-1 tracking-wider uppercase font-mono">of {target} kcal</div>
       </div>
     </div>
   );
 }
+
+const getGramsFromServingSize = (servingSizeStr) => {
+  if (!servingSizeStr) return 100;
+  const cleanStr = servingSizeStr.toLowerCase().trim();
+  
+  const parenMatch = cleanStr.match(/\((\d+(?:\.\d+)?)\s*(g|ml|grams|mliter)\)/);
+  if (parenMatch) {
+    return parseFloat(parenMatch[1]);
+  }
+  
+  const directMatch = cleanStr.match(/^(\d+(?:\.\d+)?)\s*(g|ml|grams|mliter)/);
+  if (directMatch) {
+    return parseFloat(directMatch[1]);
+  }
+  
+  const numberMatch = cleanStr.match(/^(\d+(?:\.\d+)?)/);
+  if (numberMatch) {
+    const val = parseFloat(numberMatch[1]);
+    return val > 0 ? val : 100;
+  }
+  
+  return 100;
+};
+
+const calculateNutritionForLog = (foodItem, quantity, unit) => {
+  const qty = parseFloat(quantity);
+  if (isNaN(qty) || qty <= 0) return { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
+
+  const isCustom = !!foodItem.isCustom;
+  const baseCal = parseFloat(foodItem.calories) || 0;
+  const baseProt = parseFloat(foodItem.protein) || 0;
+  const baseCarbs = parseFloat(foodItem.carbs) || 0;
+  const baseFat = parseFloat(foodItem.fat) || parseFloat(foodItem.fats) || 0;
+  const baseFiber = parseFloat(foodItem.fiber) || 0;
+
+  let servingWeightInGrams = 100;
+  if (foodItem.servingSize) {
+    servingWeightInGrams = getGramsFromServingSize(foodItem.servingSize);
+  }
+
+  let calculatedCal = 0;
+  let calculatedProt = 0;
+  let calculatedCarbs = 0;
+  let calculatedFat = 0;
+  let calculatedFiber = 0;
+
+  const cleanUnit = (unit || "serving").toLowerCase();
+
+  if (isCustom) {
+    if (cleanUnit === "g" || cleanUnit === "ml") {
+      const factor = qty / (servingWeightInGrams || 100);
+      calculatedCal = baseCal * factor;
+      calculatedProt = baseProt * factor;
+      calculatedCarbs = baseCarbs * factor;
+      calculatedFat = baseFat * factor;
+      calculatedFiber = baseFiber * factor;
+    } else {
+      calculatedCal = baseCal * qty;
+      calculatedProt = baseProt * qty;
+      calculatedCarbs = baseCarbs * qty;
+      calculatedFat = baseFat * qty;
+      calculatedFiber = baseFiber * qty;
+    }
+  } else {
+    let grams = qty;
+    if (cleanUnit === "kg") {
+      grams = qty * 1000;
+    } else if (cleanUnit === "serving" || cleanUnit === "piece" || cleanUnit === "cup" || cleanUnit === "tbsp") {
+      grams = qty * servingWeightInGrams;
+    }
+
+    const factor = grams / 100;
+    calculatedCal = baseCal * factor;
+    calculatedProt = baseProt * factor;
+    calculatedCarbs = baseCarbs * factor;
+    calculatedFat = baseFat * factor;
+    calculatedFiber = baseFiber * factor;
+  }
+
+  const roundToOneDecimal = (val) => Math.round(val * 10) / 10;
+
+  const result = {
+    calories: roundToOneDecimal(calculatedCal),
+    protein: roundToOneDecimal(calculatedProt),
+    carbs: roundToOneDecimal(calculatedCarbs),
+    fat: roundToOneDecimal(calculatedFat),
+    fiber: roundToOneDecimal(calculatedFiber)
+  };
+
+  // Developer tracing logs
+  console.log(`[Nutrition Calculation Tracing]`, {
+    foodName: foodItem.name || foodItem.food_name,
+    isCustom,
+    qty,
+    unit,
+    servingSizeStr: foodItem.servingSize || foodItem.serving_size,
+    servingWeightInGrams,
+    baseNutrients: { calories: baseCal, protein: baseProt, carbs: baseCarbs, fat: baseFat, fiber: baseFiber },
+    calculated: result
+  });
+
+  return result;
+};
+
 
 const MEAL_OPTS = [
   { value: "breakfast", label: "Breakfast", icon: "🍳" },
@@ -217,6 +321,11 @@ export default function CalorieTrackerPage() {
   const carbs = log.reduce((sum, item) => sum + (item.carbs || 0), 0);
   const fats = log.reduce((sum, item) => sum + (item.fats || 0), 0);
 
+  const previewNutrition = useMemo(() => {
+    if (!selectedFoodPreview) return null;
+    return calculateNutritionForLog(selectedFoodPreview, qty, unit);
+  }, [selectedFoodPreview, qty, unit]);
+
   const addToRecent = (item) => {
     const recentItem = {
       food_name: item.food_name || item.name,
@@ -236,6 +345,7 @@ export default function CalorieTrackerPage() {
   };
 
   const handleAdd = async () => {
+    if (submitting) return;
     let fName = food.trim();
     let finalQty = parseFloat(qty);
     let finalUnit = unit;
@@ -258,7 +368,15 @@ export default function CalorieTrackerPage() {
     setError("");
     setSubmitting(true);
     try {
-      const displayQty = finalQty > 0 ? finalQty : 1;
+      let finalCalories, finalProtein, finalCarbs, finalFats;
+      if (selectedFoodPreview) {
+        const nut = calculateNutritionForLog(selectedFoodPreview, finalQty, finalUnit);
+        finalCalories = Math.round(nut.calories);
+        finalProtein = Math.round(nut.protein);
+        finalCarbs = Math.round(nut.carbs);
+        finalFats = Math.round(nut.fat);
+      }
+
       const payload = {
         food_name: selectedFoodPreview ? selectedFoodPreview.name : fName,
         quantity: finalQty,
@@ -266,10 +384,10 @@ export default function CalorieTrackerPage() {
         meal_type: mealType,
         date: todayStr,
         ...(selectedFoodPreview ? {
-          calories: Math.round(selectedFoodPreview.calories * displayQty),
-          protein: Math.round(selectedFoodPreview.protein * displayQty),
-          carbs: Math.round(selectedFoodPreview.carbs * displayQty),
-          fats: Math.round(selectedFoodPreview.fat * displayQty),
+          calories: finalCalories,
+          protein: finalProtein,
+          carbs: finalCarbs,
+          fats: finalFats,
         } : {})
       };
       const { data } = await addFoodLog(payload);
@@ -320,6 +438,7 @@ export default function CalorieTrackerPage() {
   };
 
   const handleLogCustomFoodDirect = async (item) => {
+    if (submitting) return;
     setError("");
     setSubmitting(true);
     try {
@@ -564,7 +683,7 @@ export default function CalorieTrackerPage() {
               <div className="text-lg">{icon}</div>
             </div>
             <div className="flex items-baseline gap-1.5 mt-2">
-              <div className="font-syne font-extrabold text-3xl leading-none" style={{ color }}>{value.toLocaleString()}</div>
+              <div className="font-syne font-extrabold text-3xl leading-none" style={{ color }}>{typeof value === "number" && label !== "Target Intake" ? value.toFixed(1) : value.toLocaleString()}</div>
               <div className="text-xs text-[var(--text-muted)] font-mono font-semibold">kcal</div>
             </div>
           </div>
@@ -586,7 +705,7 @@ export default function CalorieTrackerPage() {
               <div key={m.label}>
                 <div className="flex justify-between text-xs mb-1.5 font-medium">
                   <span className="text-[var(--text-secondary)]">{m.label}</span>
-                  <span className="font-mono font-bold" style={{ color: m.color }}>{m.val}g / {m.max}g</span>
+                  <span className="font-mono font-bold" style={{ color: m.color }}>{parseFloat(m.val).toFixed(1)}g / {m.max}g</span>
                 </div>
                 <div className="progress-bar-track h-1.5 bg-[var(--border)] rounded-full overflow-hidden">
                   <div className="progress-bar-fill h-full rounded-full" style={{ width: `${Math.min((m.val / m.max) * 100, 100)}%`, background: m.color }} />
@@ -755,35 +874,35 @@ export default function CalorieTrackerPage() {
                   <div className="grid grid-cols-4 gap-2 text-center mt-1">
                     <div className="bg-white/[0.03] p-2 rounded-lg border border-[var(--border)]">
                       <div className="text-xs font-mono font-bold text-[var(--cyan)]">
-                        {Math.round(selectedFoodPreview.calories * (parseFloat(qty) > 0 ? parseFloat(qty) : 1))}
+                        {previewNutrition ? previewNutrition.calories.toFixed(1) : "0.0"}
                       </div>
                       <div className="text-[9px] uppercase font-mono text-[var(--text-muted)] font-semibold mt-0.5">Calories</div>
                     </div>
                     <div className="bg-white/[0.03] p-2 rounded-lg border border-[var(--border)]">
                       <div className="text-xs font-mono font-bold text-[var(--violet)]">
-                        {Math.round(selectedFoodPreview.protein * (parseFloat(qty) > 0 ? parseFloat(qty) : 1))}g
+                        {previewNutrition ? previewNutrition.protein.toFixed(1) : "0.0"}g
                       </div>
                       <div className="text-[9px] uppercase font-mono text-[var(--text-muted)] font-semibold mt-0.5">Protein</div>
                     </div>
                     <div className="bg-white/[0.03] p-2 rounded-lg border border-[var(--border)]">
                       <div className="text-xs font-mono font-bold text-[var(--amber)]">
-                        {Math.round(selectedFoodPreview.carbs * (parseFloat(qty) > 0 ? parseFloat(qty) : 1))}g
+                        {previewNutrition ? previewNutrition.carbs.toFixed(1) : "0.0"}g
                       </div>
                       <div className="text-[9px] uppercase font-mono text-[var(--text-muted)] font-semibold mt-0.5">Carbs</div>
                     </div>
                     <div className="bg-white/[0.03] p-2 rounded-lg border border-[var(--border)]">
                       <div className="text-xs font-mono font-bold text-[var(--emerald)]">
-                        {Math.round(selectedFoodPreview.fat * (parseFloat(qty) > 0 ? parseFloat(qty) : 1))}g
+                        {previewNutrition ? previewNutrition.fat.toFixed(1) : "0.0"}g
                       </div>
                       <div className="text-[9px] uppercase font-mono text-[var(--text-muted)] font-semibold mt-0.5">Fats</div>
                     </div>
                   </div>
                   
-                  {selectedFoodPreview.fiber > 0 && (
+                  {previewNutrition && previewNutrition.fiber > 0 && (
                     <div className="text-[11px] text-[var(--text-muted)] mt-0.5 font-medium flex items-center justify-between border-t border-[var(--border)] pt-2 px-1">
                       <span>Dietary Fiber:</span>
                       <span className="font-mono text-[var(--text-secondary)]">
-                        {Math.round(selectedFoodPreview.fiber * (parseFloat(qty) > 0 ? parseFloat(qty) : 1))}g
+                        {previewNutrition.fiber.toFixed(1)}g
                       </span>
                     </div>
                   )}
@@ -1000,8 +1119,8 @@ export default function CalorieTrackerPage() {
                           
                           <div className="flex items-center gap-3.5">
                             <div className="text-right">
-                              <div className="text-[13px] font-mono font-bold text-[var(--text-primary)]">{entry.calories} kcal</div>
-                              <div className="text-[10px] font-mono font-semibold text-[var(--text-muted)] mt-0.5">P:{entry.protein}g C:{entry.carbs}g F:{entry.fats}g</div>
+                              <div className="text-[13px] font-mono font-bold text-[var(--text-primary)]">{parseFloat(entry.calories).toFixed(1)} kcal</div>
+                              <div className="text-[10px] font-mono font-semibold text-[var(--text-muted)] mt-0.5">P:{parseFloat(entry.protein).toFixed(1)}g C:{parseFloat(entry.carbs).toFixed(1)}g F:{parseFloat(entry.fats).toFixed(1)}g</div>
                             </div>
                             <button 
                               onClick={() => handleDelete(entry.id)} 
