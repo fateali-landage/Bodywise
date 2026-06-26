@@ -87,11 +87,36 @@ export const getDailyFoodLog = async (req, res) => {
       return res.status(401).json({ success: false, error: "Unauthorized: userId not found in token." });
     }
 
-    const date = req.query.date || new Date().toISOString().slice(0, 10);
+    const { date, start_date, end_date } = req.query;
+
+    if (start_date && end_date) {
+      if (!supabaseAdmin) {
+        const filtered = localLogs.filter(l => l.user_id === userId && l.date >= start_date && l.date <= end_date);
+        return res.json({ success: true, data: filtered, source: "mock" });
+      }
+      const { data, error } = await supabaseAdmin
+        .from("food_logs")
+        .select("*")
+        .eq("user_id", userId)
+        .gte("date", start_date)
+        .lte("date", end_date)
+        .order("date", { ascending: true });
+
+      if (error) {
+        if (error.code === '42P01') {
+          const filtered = localLogs.filter(l => l.user_id === userId && l.date >= start_date && l.date <= end_date);
+          return res.json({ success: true, data: filtered, source: "mock_fallback" });
+        }
+        return res.status(400).json({ success: false, error: error.message });
+      }
+      return res.json({ success: true, data });
+    }
+
+    const targetDate = date || new Date().toISOString().slice(0, 10);
 
     if (!supabaseAdmin) {
       // Mock mode
-      const filtered = localLogs.filter(l => l.user_id === userId && l.date === date);
+      const filtered = localLogs.filter(l => l.user_id === userId && l.date === targetDate);
       return res.json({ success: true, data: filtered, source: "mock" });
     }
 
@@ -99,13 +124,13 @@ export const getDailyFoodLog = async (req, res) => {
       .from("food_logs")
       .select("*")
       .eq("user_id", userId)
-      .eq("date", date)
+      .eq("date", targetDate)
       .order("created_at", { ascending: false });
 
     if (error) {
       // If table doesn't exist, we fallback to mock automatically instead of throwing
       if (error.code === '42P01') { 
-         const filtered = localLogs.filter(l => l.user_id === userId && l.date === date);
+         const filtered = localLogs.filter(l => l.user_id === userId && l.date === targetDate);
          return res.json({ success: true, data: filtered, source: "mock_fallback" });
       }
       return res.status(400).json({ success: false, error: error.message });
@@ -121,7 +146,7 @@ export const getDailyFoodLog = async (req, res) => {
 // ── POST /api/food-logs ───────────────────────────────────────────────────────
 export const addFoodLog = async (req, res) => {
   try {
-    const { food_name, quantity, unit, meal_type, date } = req.body;
+    const { food_name, quantity, unit, meal_type, date, calories, protein, carbs, fats } = req.body;
     const userId = req.user?.id;
 
     if (!userId) return res.status(400).json({ success: false, error: "userId is required." });
@@ -131,31 +156,42 @@ export const addFoodLog = async (req, res) => {
     if (q < 0) return res.status(400).json({ success: false, error: "Quantity cannot be negative." });
 
     const u = unit || "serving";
-    let est = estimateFood(food_name, q, u);
+    
+    let est;
+    if (calories !== undefined && protein !== undefined && carbs !== undefined && fats !== undefined) {
+      est = {
+        calories: parseInt(calories, 10) || 0,
+        protein: parseInt(protein, 10) || 0,
+        carbs: parseInt(carbs, 10) || 0,
+        fats: parseInt(fats, 10) || 0
+      };
+    } else {
+      est = estimateFood(food_name, q, u);
 
-    // AI Attempt
-    try {
-      const insight = await generateInsight(
-        { food: food_name, quantity: q, unit: u },
-        `You are a nutrition AI. Estimate the calories and macros for this specific food and amount: ${q} ${u} of ${food_name}. 
-        Return strictly in this format (no other text): Calories: X, Protein: Xg, Carbs: Xg, Fats: Xg`
-      );
+      // AI Attempt
+      try {
+        const insight = await generateInsight(
+          { food: food_name, quantity: q, unit: u },
+          `You are a nutrition AI. Estimate the calories and macros for this specific food and amount: ${q} ${u} of ${food_name}. 
+          Return strictly in this format (no other text): Calories: X, Protein: Xg, Carbs: Xg, Fats: Xg`
+        );
 
-      const calMatch = insight.match(/Calories:\s*(\d+)/i);
-      const pMatch = insight.match(/Protein:\s*(\d+)g/i);
-      const cMatch = insight.match(/Carbs:\s*(\d+)g/i);
-      const fMatch = insight.match(/Fats:\s*(\d+)g/i);
+        const calMatch = insight.match(/Calories:\s*(\d+)/i);
+        const pMatch = insight.match(/Protein:\s*(\d+)g/i);
+        const cMatch = insight.match(/Carbs:\s*(\d+)g/i);
+        const fMatch = insight.match(/Fats:\s*(\d+)g/i);
 
-      if (calMatch && pMatch && cMatch && fMatch) {
-        est = {
-          calories: parseInt(calMatch[1], 10),
-          protein: parseInt(pMatch[1], 10),
-          carbs: parseInt(cMatch[1], 10),
-          fats: parseInt(fMatch[1], 10)
-        };
+        if (calMatch && pMatch && cMatch && fMatch) {
+          est = {
+            calories: parseInt(calMatch[1], 10),
+            protein: parseInt(pMatch[1], 10),
+            carbs: parseInt(cMatch[1], 10),
+            fats: parseInt(fMatch[1], 10)
+          };
+        }
+      } catch (e) {
+        console.warn("AI fallback used for addFoodLog due to timeout or error", e);
       }
-    } catch (e) {
-      console.warn("AI fallback used for addFoodLog due to timeout or error", e);
     }
 
     const logDate = date || new Date().toISOString().slice(0, 10);

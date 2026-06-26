@@ -6,6 +6,10 @@ import fs from "node:fs";
 import rateLimit from "express-rate-limit";
 
 import apiRoutes from "./routes/apiRoutes.js";
+import nutritionRoutes from "./routes/nutritionRoutes.js";
+import customFoodRoutes from "./routes/customFoodRoutes.js";
+import goalRoutes from "./routes/goalRoutes.js";
+import weightRoutes from "./routes/weightRoutes.js";
 import { env } from "./config/env.js";
 import helmet from "helmet";
 import { sanitizeInputs } from "./middleware/sanitize.js";
@@ -82,6 +86,10 @@ app.get("/health", (_, res) =>
 );
 
 // ── API routes ─────────────────────────────────────────────────────────────────
+app.use("/api/nutrition", nutritionRoutes);
+app.use("/api/custom-foods", customFoodRoutes);
+app.use("/api/goals", goalRoutes);
+app.use("/api/weight", weightRoutes);
 app.use("/api", apiRoutes);
 
 // Catch-all for undefined API routes to ensure JSON instead of HTML

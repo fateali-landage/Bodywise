@@ -13,6 +13,7 @@ dotenv.config();
 const GEMINI_KEY = process.env.GEMINI_API_KEY || "";
 const SUPA_URL = process.env.SUPABASE_URL || "";
 const SUPA_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || "";
+const USDA_KEY = process.env.USDA_API_KEY || "";
 
 if (!GEMINI_KEY) {
   console.warn(
@@ -28,6 +29,13 @@ if (!SUPA_URL || !SUPA_KEY) {
   );
 }
 
+if (!USDA_KEY) {
+  console.warn(
+    "[env] ⚠️  USDA_API_KEY is not set. " +
+    "Food search requests will return mock data."
+  );
+}
+
 export const env = {
   port: process.env.PORT || 5000,
   frontendUrl: process.env.FRONTEND_URL || "https://bodywise-two.vercel.app",
@@ -36,4 +44,5 @@ export const env = {
   supabaseUrl: SUPA_URL,
   supabaseServiceRoleKey: SUPA_KEY,
   supabaseAnonKey: process.env.SUPABASE_ANON_KEY || "",
+  usdaApiKey: USDA_KEY,
 };

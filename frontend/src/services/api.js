@@ -68,6 +68,7 @@ export const listHabits       = ()        => api.get("/api/habits");
 export const createHabit      = (payload) => api.post("/api/habits", payload);
 
 export const getDailyFoodLog  = (date)    => api.get(`/api/food-logs?date=${date}`);
+export const getFoodLogsRange = (start, end) => api.get(`/api/food-logs?start_date=${start}&end_date=${end}`);
 export const addFoodLog       = (payload) => api.post("/api/food-logs", payload);
 export const deleteFoodLog    = (id)      => api.delete(`/api/food-logs/${id}`);
 
@@ -75,5 +76,17 @@ export const getHistory       = ()        => api.get("/api/history");
 
 export const aiChat = (payload) =>
   api.post("/api/ai/chat", payload);
+
+// ── Goals API ────────────────────────────────────────────────────────────────
+export const getActiveGoal = () => api.get("/api/goals");
+export const createOrUpdateGoal = (payload) => api.post("/api/goals", payload);
+export const updateGoalTargets = (payload) => api.put("/api/goals", payload);
+export const resetGoal = () => api.delete("/api/goals");
+
+// ── Weight History API ────────────────────────────────────────────────────────
+export const getWeightHistory = (range = "7days") => api.get(`/api/weight?range=${range}`);
+export const getCustomWeightHistory = (start, end) => api.get(`/api/weight?range=custom&start_date=${start}&end_date=${end}`);
+export const addWeightLog = (payload) => api.post("/api/weight", payload);
+export const deleteWeightLog = (id) => api.delete(`/api/weight/${id}`);
 
 export default api;

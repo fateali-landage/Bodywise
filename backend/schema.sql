@@ -85,3 +85,85 @@ USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
 
 -- Verify that the DB is fully set up.
+
+-- 8. Custom Foods Table
+CREATE TABLE IF NOT EXISTS public.custom_foods (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    food_name TEXT NOT NULL,
+    serving_size TEXT NOT NULL DEFAULT '1 serving',
+    calories INTEGER NOT NULL DEFAULT 0,
+    protein INTEGER NOT NULL DEFAULT 0,
+    carbs INTEGER NOT NULL DEFAULT 0,
+    fat INTEGER NOT NULL DEFAULT 0,
+    fiber INTEGER NOT NULL DEFAULT 0,
+    is_favorite BOOLEAN DEFAULT false,
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable RLS
+ALTER TABLE public.custom_foods ENABLE ROW LEVEL SECURITY;
+
+-- Policies for user data isolation
+DROP POLICY IF EXISTS "Users can manage their own custom_foods" ON public.custom_foods;
+CREATE POLICY "Users can manage their own custom_foods" 
+ON public.custom_foods FOR ALL 
+USING (auth.uid() = user_id) 
+WITH CHECK (auth.uid() = user_id);
+
+-- 9. User Goals Table
+CREATE TABLE IF NOT EXISTS public.user_goals (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    goal_type TEXT NOT NULL,
+    current_weight NUMERIC NOT NULL,
+    target_weight NUMERIC NOT NULL,
+    target_date DATE,
+    weekly_goal TEXT,
+    activity_level TEXT NOT NULL,
+    height NUMERIC NOT NULL,
+    gender TEXT NOT NULL,
+    age INTEGER NOT NULL,
+    daily_calorie_goal INTEGER NOT NULL,
+    protein_goal INTEGER NOT NULL,
+    carbs_goal INTEGER NOT NULL,
+    fat_goal INTEGER NOT NULL,
+    water_goal INTEGER NOT NULL DEFAULT 8,
+    status TEXT NOT NULL DEFAULT 'active',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable RLS
+ALTER TABLE public.user_goals ENABLE ROW LEVEL SECURITY;
+
+-- Policies for user_goals
+DROP POLICY IF EXISTS "Users can manage their own user_goals" ON public.user_goals;
+CREATE POLICY "Users can manage their own user_goals" 
+ON public.user_goals FOR ALL 
+USING (auth.uid() = user_id) 
+WITH CHECK (auth.uid() = user_id);
+
+-- 10. Weight History Table
+CREATE TABLE IF NOT EXISTS public.weight_history (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    weight NUMERIC NOT NULL,
+    body_fat NUMERIC,
+    muscle_mass NUMERIC,
+    recorded_at DATE NOT NULL DEFAULT CURRENT_DATE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable RLS
+ALTER TABLE public.weight_history ENABLE ROW LEVEL SECURITY;
+
+-- Policies for weight_history
+DROP POLICY IF EXISTS "Users can manage their own weight_history" ON public.weight_history;
+CREATE POLICY "Users can manage their own weight_history" 
+ON public.weight_history FOR ALL 
+USING (auth.uid() = user_id) 
+WITH CHECK (auth.uid() = user_id);
+
