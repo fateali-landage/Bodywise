@@ -107,7 +107,12 @@ app.use(errorHandler);
 const frontendDist = path.resolve(__dirname, "../frontend/dist");
 if (fs.existsSync(frontendDist)) {
   app.use(express.static(frontendDist));
-  app.get(/^(?!\/api|\/health).*/, (_, res) => {
+  app.get(/^(?!\/api|\/health).*/, (req, res, next) => {
+    const ext = path.extname(req.path);
+    if (ext || req.path.startsWith("/assets/") || req.path.startsWith("/icons/")) {
+      res.status(404).send("Not Found");
+      return;
+    }
     res.sendFile(path.join(frontendDist, "index.html"));
   });
 }
