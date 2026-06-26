@@ -86,7 +86,7 @@ export default function HistoryPage() {
             
             {bmiData.length > 1 ? (
               <div className="w-full h-[320px] min-w-0 mt-4">
-                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={100}>
                   <LineChart data={bmiData} margin={{ top: 10, right: 10, left: -22, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="4 4" stroke="var(--border)" vertical={false} />
                     <XAxis dataKey="date" tick={{ fill: "var(--text-muted)", fontSize: 10.5, fontWeight: 500 }} axisLine={false} tickLine={false} />

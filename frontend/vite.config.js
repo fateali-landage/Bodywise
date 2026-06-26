@@ -175,9 +175,37 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff,woff2}"],
-        navigateFallback: "/offline.html",
-        navigateFallbackDenylist: [/^\/api/, /^\/auth/, /supabase/, /realtime/],
+        navigateFallback: "/index.html",
+        navigateFallbackDenylist: [
+          /^\/api/,
+          /^\/auth/,
+          /supabase/,
+          /realtime/,
+          /\.js$/,
+          /\.css$/,
+          /\.png$/,
+          /\.svg$/,
+          /\.ico$/,
+          /\.webmanifest$/,
+          /^\/assets\//,
+          /^\/icons\//,
+        ],
         runtimeCaching: [
+          {
+            urlPattern: ({ url }) => {
+              const urlStr = url.href.toLowerCase();
+              return (
+                url.pathname.startsWith("/api") ||
+                url.pathname.startsWith("/auth") ||
+                urlStr.includes("supabase") ||
+                urlStr.includes("googleapis") ||
+                urlStr.includes("usda") ||
+                urlStr.includes("storage") ||
+                urlStr.includes("functions")
+              );
+            },
+            handler: "NetworkOnly"
+          },
           {
             urlPattern: ({ request }) => request.mode === "navigate",
             handler: "NetworkFirst",

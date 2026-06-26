@@ -1144,7 +1144,7 @@ export default function CalorieTrackerPage() {
         <div className="glass p-5 sm:p-6 lg:sticky lg:top-[var(--space-6)] hover:border-[var(--border-hover)]">
           <SectionTitle>Weekly Intake Trend</SectionTitle>
           <div className="w-full h-[320px] min-w-0 mt-4">
-            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+            <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={100}>
               <LineChart data={weeklyData} margin={{ top: 10, right: 10, left: -22, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                 <XAxis dataKey="day" tick={{ fill: "var(--text-muted)", fontSize: 10.5, fontWeight: 500 }} axisLine={false} tickLine={false} />

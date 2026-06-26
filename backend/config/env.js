@@ -5,9 +5,14 @@
  * process.env, ensuring correct load order in ESM.
  */
 import dotenv from "dotenv";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-// Load .env file (no-op on Render where env vars are injected natively)
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load .env file from the workspace root (two directories up from config/env.js)
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 // ── Validate critical keys at startup ─────────────────────────────────────────
 const GEMINI_KEY = process.env.GEMINI_API_KEY || "";

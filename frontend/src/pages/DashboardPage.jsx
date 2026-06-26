@@ -85,8 +85,8 @@ export default function DashboardPage() {
     try {
       setLoadingGoal(true);
       const res = await getActiveGoal();
-      if (res?.success && res?.data) {
-        setGoal(res.data);
+      if (res?.data?.success && res?.data?.data) {
+        setGoal(res.data.data);
       } else {
         setGoal(null);
       }
@@ -102,8 +102,8 @@ export default function DashboardPage() {
     try {
       setLoadingWeight(true);
       const res = await getWeightHistory("1year");
-      if (res?.success && res?.data) {
-        setWeightLogs(res.data);
+      if (res?.data?.success && res?.data?.data) {
+        setWeightLogs(res.data.data);
       }
     } catch (err) {
       console.error("Error loading weight logs:", err);
@@ -119,11 +119,11 @@ export default function DashboardPage() {
       const start = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
       const end = new Date().toISOString().slice(0, 10);
       const res = await getFoodLogsRange(start, end);
-      if (res?.success && res?.data) {
-        setFoodLogsRange(res.data);
+      if (res?.data?.success && res?.data?.data) {
+        setFoodLogsRange(res.data.data);
         
         // Sum today's intake
-        const todayItems = res.data.filter(l => l.date === todayStr);
+        const todayItems = res.data.data.filter(l => l.date === todayStr);
         const cals = todayItems.reduce((s, i) => s + (i.calories || 0), 0);
         const prot = todayItems.reduce((s, i) => s + (i.protein || 0), 0);
         setTodayCalories(cals);
@@ -284,7 +284,7 @@ export default function DashboardPage() {
       };
 
       const res = await createOrUpdateGoal(payload);
-      if (res?.success) {
+      if (res?.data?.success) {
         setIsWizardOpen(false);
         fetchGoalAndProgress();
         fetchWeightLogs();
@@ -315,7 +315,7 @@ export default function DashboardPage() {
         recorded_at: logWeightDate
       };
       const res = await addWeightLog(payload);
-      if (res?.success) {
+      if (res?.data?.success) {
         setIsWeightLogOpen(false);
         setLogWeightVal("");
         setLogBodyFat("");

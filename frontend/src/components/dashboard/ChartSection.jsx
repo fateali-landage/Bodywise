@@ -235,7 +235,7 @@ export default function ChartSection({ weightLogs = [], foodLogs = [], activeGoa
             </span>
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+          <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={100}>
             {chartConfig.type === "bar" ? (
               <BarChart data={chartConfig.data} margin={{ top: 10, right: 10, left: -22, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />

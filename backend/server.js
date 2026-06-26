@@ -20,6 +20,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Enable trust proxy for rate limiting behind reverse proxies (Render, Vercel)
+app.set("trust proxy", 1);
+
 // ── CORS ──────────────────────────────────────────────────────────────────────
 // Whitelist only the deployed Vercel frontend (+ localhost for dev)
 const ALLOWED_ORIGINS = [
@@ -37,7 +40,7 @@ app.use(
       if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
       callback(new Error(`CORS: origin '${origin}' is not allowed`));
     },
-    methods: ["GET", "POST", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   }),

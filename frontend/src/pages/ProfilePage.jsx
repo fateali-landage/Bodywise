@@ -32,8 +32,8 @@ export default function ProfilePage() {
     try {
       setLoadingGoal(true);
       const res = await getActiveGoal();
-      if (res?.success && res?.data) {
-        setGoal(res.data);
+      if (res?.data?.success && res?.data?.data) {
+        setGoal(res.data.data);
         setEditTargetWeight(String(res.data.target_weight));
         setEditTargetDate(res.data.target_date || "");
         setEditActivity(res.data.activity_level);
@@ -108,7 +108,7 @@ export default function ProfilePage() {
       };
 
       const res = await updateGoalTargets(payload);
-      if (res?.success) {
+      if (res?.data?.success) {
         setGoalSuccess("Goal settings and daily targets saved successfully.");
         fetchGoal();
       }
@@ -128,7 +128,7 @@ export default function ProfilePage() {
     try {
       const newStatus = goal.status === "paused" ? "active" : "paused";
       const res = await updateGoalTargets({ status: newStatus });
-      if (res?.success) {
+      if (res?.data?.success) {
         setGoalSuccess(`Goal targets ${newStatus === "paused" ? "paused" : "resumed"} successfully.`);
         fetchGoal();
       }
@@ -147,7 +147,7 @@ export default function ProfilePage() {
     setSubmittingGoal(true);
     try {
       const res = await resetGoal();
-      if (res?.success) {
+      if (res?.data?.success) {
         setGoalSuccess("Goal deleted successfully. Configure a new goal on the dashboard.");
         setGoal(null);
       }
