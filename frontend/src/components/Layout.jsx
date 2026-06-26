@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
+import PwaPrompts from "./PwaPrompts";
 import { BodyWiseProvider } from "../context/BodyWiseContext";
 import { ThemeProvider, useTheme } from "../context/ThemeContext";
 import { supabase } from "../services/supabaseClient";
@@ -71,6 +72,7 @@ function AppShell({ user }) {
             <Outlet />
           </main>
         </div>
+        <PwaPrompts />
       </div>
     </BodyWiseProvider>
   );

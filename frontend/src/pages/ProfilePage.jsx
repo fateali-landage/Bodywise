@@ -1,9 +1,32 @@
+import { useState, useEffect } from "react";
 import { useBodyWise } from "../context/BodyWiseContext";
 import { supabase } from "../services/supabaseClient";
 import { ActionButton, PageHeader, SectionHeader, SectionTitle } from "../components/ui";
 
 export default function ProfilePage() {
   const { user, inputs, lifestyle, result } = useBodyWise();
+
+  // PWA and network states
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [swActive, setSwActive] = useState(false);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    
+    if ("serviceWorker" in navigator) {
+      setSwActive(!!navigator.serviceWorker.controller);
+    }
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -95,7 +118,7 @@ export default function ProfilePage() {
 
       {/* Habit log consistency checklist */}
       <SectionTitle>Consistency Tracking</SectionTitle>
-      <div className="fade-up d4 glass p-5 sm:p-6 hover:border-[var(--border-hover)]">
+      <div className="fade-up d4 glass p-5 sm:p-6 mb-4 hover:border-[var(--border-hover)]">
         <SectionHeader icon="📋" title="Historical Habits Log" badge="Sync State" badgeColor="emerald" />
         <div className="mt-3">
           {result.habits?.length ? (
@@ -114,12 +137,43 @@ export default function ProfilePage() {
               ))}
             </div>
           ) : (
-            <div className="empty-state">
-              <span className="text-3xl mb-1">📋</span>
-              <span className="font-semibold text-sm text-[var(--text-primary)]">Habits History Empty</span>
-              <span className="text-xs text-[var(--text-muted)]">Habits logged on calories page will sync and log here.</span>
-            </div>
+            <p className="m-0 text-[13px] text-[var(--text-muted)]">
+              No habit entries yet. Save your first one from the Diet & Calories page.
+            </p>
           )}
+        </div>
+      </div>
+
+      <SectionTitle>Platform Status</SectionTitle>
+      <div className="fade-up d5 glass p-5 sm:p-6 mb-8 hover:border-[var(--border-hover)]">
+        <SectionHeader icon="⚙️" title="PWA & Network Systems" badge="v1.0.0" badgeColor="cyan" />
+        <div className="mt-2">
+          <div className="stat-row py-3 flex items-center justify-between">
+            <span className="text-[13.5px] text-[var(--text-secondary)] font-medium">Application Version</span>
+            <span className="text-[13px] text-[var(--text-primary)] font-semibold font-mono">v1.0.0 (Production)</span>
+          </div>
+          <div className="stat-row py-3 flex items-center justify-between">
+            <span className="text-[13.5px] text-[var(--text-secondary)] font-medium">Network Connection</span>
+            <span className={`badge ${isOnline ? "badge-emerald" : "badge-amber"} text-[9px]`}>
+              {isOnline ? "Online (Live sync)" : "Offline Mode"}
+            </span>
+          </div>
+          <div className="stat-row py-3 flex items-center justify-between">
+            <span className="text-[13.5px] text-[var(--text-secondary)] font-medium">PWA Native Shell</span>
+            <span className="text-[13px] text-[var(--text-primary)] font-semibold">
+              {isStandalone ? "Stand-alone Application ✔" : "Running in Web Browser"}
+            </span>
+          </div>
+          <div className="stat-row py-3 flex items-center justify-between">
+            <span className="text-[13.5px] text-[var(--text-secondary)] font-medium">Service Worker Engine</span>
+            <span className={`badge ${swActive ? "badge-cyan" : "badge-violet"} text-[9px]`}>
+              {swActive ? "Active & Pre-cached" : "Registering SW"}
+            </span>
+          </div>
+          <div className="stat-row py-3 flex items-center justify-between">
+            <span className="text-[13.5px] text-[var(--text-secondary)] font-medium">Security Policy</span>
+            <span className="text-[13px] text-[var(--cyan)] font-semibold">JWT sessions bypassed (Strict Secure SW)</span>
+          </div>
         </div>
       </div>
     </div>

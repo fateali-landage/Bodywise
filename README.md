@@ -166,3 +166,47 @@ VITE_SUPABASE_ANON_KEY=
 ## Notes
 - AI integration uses OpenAI if `OPENAI_API_KEY` is provided, otherwise safe mock responses.
 - Skin analyzer intentionally simulates detection (no complex ML), ideal for MVP demos.
+
+## Progressive Web App (PWA) Support
+
+BodyWise AI is equipped with production-grade PWA capabilities, turning it into an installable native-like application on desktop and mobile platforms.
+
+### Features
+- **Standalone installation**: Access the app from your home screen (on Android, iOS, Chrome, Edge) without browser controls.
+- **Offline fallback page**: Custom page loaded dynamically if connection fails during navigation. Bypasses API/auth endpoints to maintain security.
+- **Pre-cached static assets**: Service worker caches stylesheets, scripts, HTML structure, local images, and fonts for near-instant offline load times.
+- **Idle-safe update process**: Auto-polls for newer platform builds and alerts users via a toast prompt. If the user is busy typing, chatting, uploading, or analyzing, the update prompt is delayed automatically until they are idle.
+- **App shortcuts**: Context shortcuts for Dashboard, Analyze Signals, AI Coach, History Logs, Calorie Tracker, and Settings directly from the system icon.
+
+### Local PWA Testing
+1. Ensure node packages are installed:
+   ```bash
+   cd frontend
+   npm install
+   ```
+2. Build the client assets and compile the service worker:
+   ```bash
+   npm run build
+   ```
+3. Test locally in preview mode:
+   ```bash
+   npm run preview
+   ```
+4. Open the localhost URL in Google Chrome or Microsoft Edge. You will see the install icon in the URL search bar.
+
+### Service Worker Caching Architecture
+- **HTML**: Network First (falls back to cached `offline.html` if network fails).
+- **CSS / JS / Fonts**: Cache First (pre-cached during build).
+- **Images**: Stale While Revalidate (immediate load from cache, background fetch for updates).
+- **Auth / Supabase / Realtime / AI Endpoints**: Bypassed entirely (never cached) to guarantee JWT token security and real-time consistency.
+
+### Browser Support Matrix
+- **Android Chrome / Edge / Firefox**: Full support (install banner promotes app immediately).
+- **iOS Safari / Chrome**: Support via "Add to Home Screen" sharing control.
+- **Desktop Chrome / Edge / Opera**: Full support (install icon in URL bar).
+- **Desktop Firefox / Safari**: Standard PWA limitations (caching and service worker active, standalone window relies on extension/native shortcuts).
+
+### Troubleshooting
+- **SW not active**: Verify you are running on `localhost` or a secure `https://` origin. Service workers require HTTPS for security.
+- **Out of date cache**: Click "Update Now" on the version prompt, or clear the storage in Chrome Developer Tools (Application -> Clear Site Data).
+
