@@ -5,112 +5,123 @@ import { ActionButton, PageHeader, SectionHeader, SectionTitle } from "../compon
 export default function ProfilePage() {
   const { user, inputs, lifestyle, result } = useBodyWise();
 
-  // BUG-004/BUG-012 FIX: centralised sign-out with immediate navigate
   const signOut = async () => {
     await supabase.auth.signOut();
-    // useAuth's onAuthStateChange fires → user becomes null → ProtectedRoute redirects to /auth
   };
 
   const profileRows = [
-    { label: "Email", value: user?.email || "—" },
-    { label: "User ID", value: user?.id || "—" },
-    { label: "Last sign-in", value: user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : "—" },
-    { label: "Created", value: user?.created_at ? new Date(user.created_at).toLocaleString() : "—" },
+    { label: "Account Email", value: user?.email || "—" },
+    { label: "User Session ID", value: user?.id || "—", isMono: true },
+    { label: "Last Authentication", value: user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString("en-IN") : "—" },
+    { label: "Account Registered", value: user?.created_at ? new Date(user.created_at).toLocaleString("en-IN") : "—" },
   ];
 
   const metricRows = [
-    { label: "Weight", value: inputs.weight || "—" },
-    { label: "Height", value: inputs.height || "—" },
-    { label: "Age", value: inputs.age || "—" },
-    { label: "Gender", value: inputs.gender || "—" },
-    { label: "Diet", value: inputs.diet || "—" },
-    { label: "Activity (days/wk)", value: inputs.activity || "—" },
-    { label: "Sleep (hrs)", value: inputs.sleep || "—" },
+    { label: "Weight", value: inputs.weight ? `${inputs.weight} kg` : "—" },
+    { label: "Height", value: inputs.height ? `${inputs.height} cm` : "—" },
+    { label: "Age", value: inputs.age ? `${inputs.age} yrs` : "—" },
+    { label: "Gender Type", value: inputs.gender || "—", capitalize: true },
+    { label: "Diet Preference", value: inputs.diet || "—", capitalize: true },
+    { label: "Activity Index", value: inputs.activity ? `${inputs.activity} days/wk` : "—" },
+    { label: "Sleep Target", value: inputs.sleep ? `${inputs.sleep} hrs` : "—" },
   ];
 
   const lifestyleRows = [
-    { label: "Smoking", value: lifestyle.smoking ? "Yes" : "No" },
-    { label: "Alcohol", value: lifestyle.alcohol ? "Yes" : "No" },
-    { label: "Sleep hours", value: lifestyle.sleepHours || "—" },
-    { label: "Screen time", value: lifestyle.screenTime || "—" },
+    { label: "Active Smoking", value: lifestyle.smoking ? "Yes" : "No" },
+    { label: "Alcohol Intake", value: lifestyle.alcohol ? "Yes" : "No" },
+    { label: "Optimal Sleep", value: lifestyle.sleepHours ? `${lifestyle.sleepHours} hrs` : "—" },
+    { label: "Daily Screen Time", value: lifestyle.screenTime ? `${lifestyle.screenTime} hrs` : "—" },
   ];
 
   return (
-    <>
+    <div className="page-container">
       <PageHeader
-        title="Profile"
-        description="Your account, current metrics and recent activity."
+        title="User Settings"
+        description="Review your active credentials, biological metric history, and habit logs sync status."
       />
 
-      <SectionTitle>Account</SectionTitle>
-      <div className="fade-up d2 glass p-6 sm:p-8 mb-8">
-        <SectionHeader icon="👤" title="Account Details" badge="Supabase" badgeColor="cyan" />
-        <div className="mt-2">
+      {/* Account detail card */}
+      <SectionTitle>Account Information</SectionTitle>
+      <div className="fade-up d2 glass p-5 sm:p-6 mb-4 hover:border-[var(--border-hover)]">
+        <SectionHeader icon="👤" title="Secure Credentials" badge="Supabase active" badgeColor="cyan" />
+        <div className="mt-2 flex flex-col">
           {profileRows.map((row) => (
-            <div className="stat-row" key={row.label}>
-              <span className="text-[var(--text-muted)]">{row.label}</span>
-              <span className="font-mono text-[12.5px] text-[var(--text-primary)]">
+            <div className="stat-row py-3 flex items-center justify-between" key={row.label}>
+              <span className="text-[13.5px] text-[var(--text-secondary)] font-medium">{row.label}</span>
+              <span className={`text-[13px] text-[var(--text-primary)] font-semibold ${row.isMono ? 'font-mono' : ''}`}>
                 {row.value}
               </span>
             </div>
           ))}
         </div>
-        <ActionButton onClick={signOut} color="violet" className="mt-4">
-          Sign out
+        <ActionButton onClick={signOut} color="violet" className="mt-5 h-10 text-xs px-5">
+          Sign Out of Account
         </ActionButton>
       </div>
 
-      <SectionTitle>Body Metrics</SectionTitle>
-      <div className="fade-up d3 grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <div className="glass p-5 sm:p-6">
-          <SectionHeader icon="📏" title="Current Inputs" badge="Last entered" badgeColor="cyan" />
-          <div className="mt-2">
+      {/* Biometrics & lifestyle grids */}
+      <div className="fade-up d3 grid grid-cols-1 md:grid-cols-2 gap-5 mb-4">
+        
+        {/* Biometrics */}
+        <div className="glass p-5 sm:p-6 hover:border-[var(--border-hover)]">
+          <SectionHeader icon="📏" title="Biometric Inputs" badge="Latest Scan" badgeColor="cyan" />
+          <div className="mt-2 flex flex-col">
             {metricRows.map((row) => (
-              <div className="stat-row" key={row.label}>
-                <span className="text-[var(--text-muted)]">{row.label}</span>
-                <span className="text-[var(--text-primary)]">{row.value}</span>
+              <div className="stat-row py-3 flex items-center justify-between" key={row.label}>
+                <span className="text-[13.5px] text-[var(--text-secondary)] font-medium">{row.label}</span>
+                <span className="text-[13px] text-[var(--text-primary)] font-semibold" style={{ textTransform: row.capitalize ? 'capitalize' : 'none' }}>
+                  {row.value}
+                </span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="glass p-5 sm:p-6">
-          <SectionHeader icon="🌿" title="Lifestyle Snapshot" badge="Today" badgeColor="amber" />
-          <div className="mt-2">
+        {/* Lifestyle snapshot */}
+        <div className="glass p-5 sm:p-6 hover:border-[var(--border-hover)]">
+          <SectionHeader icon="🌿" title="Lifestyle Parameters" badge="Logged Today" badgeColor="amber" />
+          <div className="mt-2 flex flex-col">
             {lifestyleRows.map((row) => (
-              <div className="stat-row" key={row.label}>
-                <span className="text-[var(--text-muted)]">{row.label}</span>
-                <span className="text-[var(--text-primary)]">{row.value}</span>
+              <div className="stat-row py-3 flex items-center justify-between" key={row.label}>
+                <span className="text-[13.5px] text-[var(--text-secondary)] font-medium">{row.label}</span>
+                <span className="text-[13px] text-[var(--text-primary)] font-semibold">
+                  {row.value}
+                </span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <SectionTitle>Activity</SectionTitle>
-      <div className="fade-up d4 glass p-6 sm:p-8">
-        <SectionHeader icon="📋" title="Habit Entries" badge="Logged" badgeColor="emerald" />
-        <div className="mt-2">
+      {/* Habit log consistency checklist */}
+      <SectionTitle>Consistency Tracking</SectionTitle>
+      <div className="fade-up d4 glass p-5 sm:p-6 hover:border-[var(--border-hover)]">
+        <SectionHeader icon="📋" title="Historical Habits Log" badge="Sync State" badgeColor="emerald" />
+        <div className="mt-3">
           {result.habits?.length ? (
             <div className="flex flex-col">
               {result.habits.slice(0, 10).map((h) => (
-                <div className="stat-row" key={h.id}>
-                  <span className="font-mono text-xs text-[var(--text-muted)]">
-                    {h.date}
+                <div className="stat-row py-3 flex justify-between items-center" key={h.id}>
+                  <span className="font-mono text-xs text-[var(--text-muted)] font-semibold">
+                    {new Date(h.date).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" })}
                   </span>
-                  <span className="text-[12.5px] text-[var(--text-primary)]">
-                    💧 {h.water ? "✓" : "·"}  😴 {h.sleep ? "✓" : "·"}  🥩 {h.protein ? "✓" : "·"}
-                  </span>
+                  <div className="flex items-center gap-4 text-[12.5px] font-semibold text-[var(--text-secondary)]">
+                    <span className="flex items-center gap-1">💧 <strong style={{ color: h.water ? "var(--cyan)" : "var(--text-muted)" }}>{h.water ? "✓" : "·"}</strong></span>
+                    <span className="flex items-center gap-1">😴 <strong style={{ color: h.sleep ? "var(--violet)" : "var(--text-muted)" }}>{h.sleep ? "✓" : "·"}</strong></span>
+                    <span className="flex items-center gap-1">🥩 <strong style={{ color: h.protein ? "var(--emerald)" : "var(--text-muted)" }}>{h.protein ? "✓" : "·"}</strong></span>
+                  </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="m-0 text-[13px] text-[var(--text-muted)]">
-              No habit entries yet. Save your first one from the Diet & Calories page.
-            </p>
+            <div className="empty-state">
+              <span className="text-3xl mb-1">📋</span>
+              <span className="font-semibold text-sm text-[var(--text-primary)]">Habits History Empty</span>
+              <span className="text-xs text-[var(--text-muted)]">Habits logged on calories page will sync and log here.</span>
+            </div>
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 }

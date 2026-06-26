@@ -1,9 +1,9 @@
 import { useBodyWise } from "../../context/BodyWiseContext";
 
 const habits = [
-  { key: "water",    label: "Water Intake",  icon: "💧", unit: "8 glasses", color: "#0ea5e9", accent: "rgba(14,165,233,0.15)", pct: 87 },
-  { key: "protein",  label: "Protein Goal",  icon: "🍗", unit: "1.2g/kg",   color: "#00e5be", accent: "rgba(0,229,190,0.15)", pct: 60 },
-  { key: "sleep",    label: "Sleep Quality", icon: "🌙", unit: "7–9 hours",  color: "#a78bfa", accent: "rgba(167,139,250,0.15)", pct: 92 },
+  { key: "water",    label: "Water Intake",  icon: "💧", unit: "8 glasses", color: "#0ea5e9", accent: "rgba(14,165,233,0.12)", pct: 87 },
+  { key: "protein",  label: "Protein Goal",  icon: "🍗", unit: "1.2g/kg",   color: "#00e5be", accent: "rgba(0,229,190,0.12)", pct: 60 },
+  { key: "sleep",    label: "Sleep Quality", icon: "🌙", unit: "7–9 hours",  color: "#a78bfa", accent: "rgba(167,139,250,0.12)", pct: 92 },
 ];
 
 export default function HabitCard() {
@@ -13,13 +13,8 @@ export default function HabitCard() {
     const nextValue = !habitItems[key];
     setHabitItems(prev => ({ ...prev, [key]: nextValue }));
     
-    // Auto-save to backend
+    // Auto-save to backend with a tiny timeout to let state settle
     try {
-      // Note: BodyWiseProvider uses habitItems from state, 
-      // but state updates are async. We should ideally pass the new value
-      // or rely on the provider to handle it.
-      // For now, we rely on the fact that saveHabit uses the current state.
-      // However, to be safe, we might want to trigger saveHabit after state update.
       setTimeout(() => saveHabit(), 50);
     } catch (err) {
       console.error("Failed to sync habit", err);
@@ -27,7 +22,7 @@ export default function HabitCard() {
   };
 
   return (
-    <div className="glass p-4 sm:p-6 h-full flex flex-col">
+    <div className="glass p-5 sm:p-6 h-full flex flex-col hover:border-[rgba(255,255,255,0.12)]">
       <div className="flex items-center gap-2 mb-5">
         <span className="text-lg">🎯</span>
         <span className="font-syne font-bold text-[15px] text-[var(--text-primary)]">
@@ -42,44 +37,48 @@ export default function HabitCard() {
           return (
             <div 
               key={key} 
-              className="cursor-pointer group"
+              className="cursor-pointer group select-none p-2.5 rounded-xl border border-transparent hover:border-[var(--border)] hover:bg-[var(--bg-surface-2)] transition-all duration-200"
               onClick={() => toggleHabit(key)}
             >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between mb-2.5">
+                <div className="flex items-center gap-3">
                   <div 
-                    className="w-8 h-8 rounded-lg flex items-center justify-center text-[15px] transition-transform group-hover:scale-110" 
-                    style={{ background: accent }}
+                    className="w-8.5 h-8.5 rounded-lg flex items-center justify-center text-[15px] transition-transform group-hover:scale-105 duration-200" 
+                    style={{ background: accent, border: `1px solid ${color}15` }}
                   >
                     {icon}
                   </div>
                   <div>
-                    <div className="text-[13px] font-semibold text-[var(--text-primary)]">{label}</div>
-                    <div className="text-[11px] text-[var(--text-muted)]">{unit}</div>
+                    <div className="text-[13.5px] font-semibold text-[var(--text-primary)] transition-colors group-hover:color-[var(--text-primary)]">{label}</div>
+                    <div className="text-[11px] text-[var(--text-muted)] mt-0.5">{unit}</div>
                   </div>
                 </div>
+                
                 <div 
-                  className="w-5 h-5 rounded-full flex items-center justify-center text-[11px] transition-all duration-300" 
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-[11px] transition-all duration-300 active:scale-95" 
                   style={{
-                    background: checked ? `${color}22` : "var(--border)",
-                    border: `2px solid ${checked ? color : "var(--border)"}`,
-                    color: checked ? color : "var(--text-muted)",
+                    background: checked ? color : "transparent",
+                    border: `1.5px solid ${checked ? color : "var(--border)"}`,
+                    color: checked ? "#000000" : "transparent",
+                    boxShadow: checked ? `0 0 10px ${color}40` : "none",
                   }}
                 >
-                  {checked ? "✓" : ""}
+                  ✓
                 </div>
               </div>
-              <div className="progress-bar-track overflow-hidden">
+              
+              <div className="progress-bar-track h-1 rounded-full overflow-hidden bg-[var(--border)]">
                 <div
-                  className="progress-bar-fill transition-all duration-500 ease-out"
+                  className="progress-bar-fill h-full transition-all duration-500 ease-out"
                   style={{ 
                     width: `${checked ? pct : 0}%`, 
-                    background: `linear-gradient(90deg, ${color}aa, ${color})` 
+                    background: `linear-gradient(90deg, ${color}cc, ${color})` 
                   }}
                 />
               </div>
-              <div className="flex justify-end mt-1">
-                <span className="text-[10px] font-mono font-semibold" style={{ color }}>
+              <div className="flex justify-between items-center mt-1.5 px-0.5">
+                <span className="text-[10px] text-[var(--text-muted)] font-medium">Progress</span>
+                <span className="text-[10px] font-mono font-bold" style={{ color: checked ? color : "var(--text-muted)" }}>
                   {checked ? pct : 0}%
                 </span>
               </div>
