@@ -3,6 +3,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar,
 } from "recharts";
+import { ChartSkeleton } from "../ui";
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
@@ -163,12 +164,7 @@ export default function ChartSection({ weightLogs = [], foodLogs = [], activeGoa
   }, [metric, weightChartData, nutritionChartData, scoresChartData]);
 
   if (loading) {
-    return (
-      <div className="glass p-5 sm:p-6 flex flex-col gap-4 w-full h-[360px] animate-pulse justify-center items-center">
-        <Spinner />
-        <span className="text-xs text-[var(--text-muted)] font-medium">Aggregating progress metrics...</span>
-      </div>
-    );
+    return <ChartSkeleton />;
   }
 
   // Format date display for chart X-axis
